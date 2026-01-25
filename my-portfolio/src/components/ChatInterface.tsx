@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatMessage from './ChatMessage';
 import ActionButtons from './ActionButtons';
-import ProjectCard from './ProjectCard';
-import SkillsDisplay from './SkillsDisplay';
+// import ProjectCard from './ProjectCard';
+// import SkillsDisplay from './SkillsDisplay';
 import { portfolioData, suggestPrompts } from '../data/portfolioData';
 import { Send, Terminal } from 'lucide-react';
 
@@ -58,65 +58,79 @@ const ChatInterface: React.FC = () => {
         setInputValue("");
         setIsTyping(true);
 
-        // Simulate Agent processing
-        setTimeout(() => {
-            const response = generateResponse(text);
-            setMessages(prev => [...prev, response]);
-            setIsTyping(false);
-        }, 1000 + Math.random() * 500); // Random delay between 1s and 1.5s
+        // Call Groq API
+        generateResponse(text);
     };
 
-    const generateResponse = (input: string): Message => {
-        const lowerInput = input.toLowerCase();
-        let content: React.ReactNode = "I'm not sure how to answer that specifically, but you can explore the projects or ask about my background.";
+    const generateResponse = async (input: string) => {
+        const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
-        if (lowerInput.includes("about") || lowerInput.includes("bio") || lowerInput.includes("who are you")) {
-            content = (
-                <div className="whitespace-pre-line">
-                    <p className="font-semibold text-white mb-2">{portfolioData.role}</p>
-                    {portfolioData.bio}
-                </div>
-            );
-        } else if (lowerInput.includes("project") || lowerInput.includes("work")) {
-            content = (
-                <div className="space-y-4">
-                    <p>Here are some of the key projects:</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {portfolioData.projects.map(p => (
-                            <ProjectCard key={p.id} project={p} />
-                        ))}
-                    </div>
-                </div>
-            );
-        } else if (lowerInput.includes("skill") || lowerInput.includes("stack") || lowerInput.includes("tech")) {
-            content = (
-                <div>
-                    <p className="mb-3">My technical expertise includes:</p>
-                    <SkillsDisplay />
-                </div>
-            );
-        } else if (lowerInput.includes("contact") || lowerInput.includes("email") || lowerInput.includes("reach")) {
-            content = (
-                <div>
-                    <p className="mb-2">You can reach me via:</p>
-                    <ul className="space-y-1">
-                        {portfolioData.socials.map(s => (
-                            <li key={s.name}>
-                                <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
-                                    {s.name}: {s.handle}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            );
+        if (!apiKey) {
+            const errorMsg: Message = {
+                id: Date.now().toString(),
+                role: 'agent',
+                content: "I'm missing my brain! Please set the VITE_GROQ_API_KEY in the .env file."
+            };
+            setMessages(prev => [...prev, errorMsg]);
+            setIsTyping(false);
+            return;
         }
 
-        return {
-            id: (Date.now() + 1).toString(),
-            role: 'agent',
-            content
-        };
+        try {
+            const systemPrompt = `You are an AI assistant for a portfolio website representing Mirang. 
+            Here is the portfolio data: ${JSON.stringify(portfolioData)}. 
+            Your goal is to answer questions about Mirang's skills, projects, and background based on this data.
+            Be helpful, professional, and concise. If you don't know something, admit it but try to connect it to available info.
+            Always answer in the first person as if you are the agent representing Mirang.`;
+
+            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        ...messages.map(m => ({
+                            role: m.role === 'agent' ? 'assistant' : 'user',
+                            content: typeof m.content === 'string' ? m.content : "Displaying rich content component."
+                        })),
+                        { role: "user", content: input }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error.message);
+            }
+
+            const aiContent = data.choices[0].message.content;
+
+            const aiMsg: Message = {
+                id: (Date.now() + 1).toString(),
+                role: 'agent',
+                content: <div className="whitespace-pre-wrap">{aiContent}</div>
+            };
+
+            setMessages(prev => [...prev, aiMsg]);
+
+        } catch (error: any) {
+            console.error("Groq API Error:", error);
+            const errorMsg: Message = {
+                id: Date.now().toString(),
+                role: 'agent',
+                content: `Error: ${error.message || "Unknown error occurred"}. Check console for details.`
+            };
+            setMessages(prev => [...prev, errorMsg]);
+        } finally {
+            setIsTyping(false);
+        }
     };
 
     return (
