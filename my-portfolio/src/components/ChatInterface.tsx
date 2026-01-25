@@ -2,15 +2,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatMessage from './ChatMessage';
 import ActionButtons from './ActionButtons';
-// import ProjectCard from './ProjectCard';
-// import SkillsDisplay from './SkillsDisplay';
+import ProjectCard from './ProjectCard';
+import SkillsDisplay from './SkillsDisplay';
 import { portfolioData, suggestPrompts } from '../data/portfolioData';
-import { Send, Terminal } from 'lucide-react';
+import { Send, Terminal, Download, Sparkles } from 'lucide-react';
 
 type Message = {
     id: string;
     role: 'agent' | 'user';
     content: React.ReactNode;
+    isStreaming?: boolean;
 };
 
 const ChatInterface: React.FC = () => {
@@ -18,6 +19,7 @@ const ChatInterface: React.FC = () => {
     const [inputValue, setInputValue] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     // Initial greeting
     useEffect(() => {
@@ -32,7 +34,6 @@ const ChatInterface: React.FC = () => {
             )
         };
 
-        // Simulate initial delay
         const timer = setTimeout(() => {
             setMessages([initialGreeting]);
         }, 500);
@@ -58,11 +59,10 @@ const ChatInterface: React.FC = () => {
         setInputValue("");
         setIsTyping(true);
 
-        // Call Groq API
-        generateResponse(text);
+        generateResponseStream(text);
     };
 
-    const generateResponse = async (input: string) => {
+    const generateResponseStream = async (input: string) => {
         const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
         if (!apiKey) {
@@ -76,12 +76,23 @@ const ChatInterface: React.FC = () => {
             return;
         }
 
+        abortControllerRef.current = new AbortController();
+
         try {
-            const systemPrompt = `You are an AI assistant for a portfolio website representing Mirang. 
-            Here is the portfolio data: ${JSON.stringify(portfolioData)}. 
-            Your goal is to answer questions about Mirang's skills, projects, and background based on this data.
-            Be helpful, professional, and concise. If you don't know something, admit it but try to connect it to available info.
-            Always answer in the first person as if you are the agent representing Mirang.`;
+            const systemPrompt = `You are an interactive AI portfolio assistant for Mirang Bhandari.
+            
+            CORE INSTRUCTIONS:
+            1. Answer questions based on this data: ${JSON.stringify(portfolioData)}.
+            2. Be professional but personable. Answer in the first person ("I started coding when...").
+            3. CRITICAL: When relevant, use the following TAGS to display rich widgets. Do not describe the widget, just output the tag on a new line.
+            
+            TAGS:
+            - If the user asks about projects/work: Output the text intro, then "{{PROJECTS}}" at the end.
+            - If the user asks about skills/stack/technologies: Output the text intro, then "{{SKILLS}}" at the end.
+            - If the user asks for a resume/CV: Output a polite message, then "{{RESUME}}".
+            - If the user prompts "Surprise me" or asks for fun facts: Share a fun fact from the data.
+
+            4. Keep responses concise. Use markdown for formatting.`;
 
             const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
@@ -95,42 +106,121 @@ const ChatInterface: React.FC = () => {
                         { role: "system", content: systemPrompt },
                         ...messages.map(m => ({
                             role: m.role === 'agent' ? 'assistant' : 'user',
-                            content: typeof m.content === 'string' ? m.content : "Displaying rich content component."
+                            content: typeof m.content === 'string' ? m.content : "Displaying rich content."
                         })),
                         { role: "user", content: input }
                     ],
+                    stream: true,
                     temperature: 0.7,
-                    max_tokens: 500
-                })
+                    max_tokens: 1000
+                }),
+                signal: abortControllerRef.current.signal
             });
 
-            const data = await response.json();
+            if (!response.ok) throw new Error(response.statusText);
+            if (!response.body) throw new Error("No response body");
 
-            if (data.error) {
-                throw new Error(data.error.message);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            const msgId = (Date.now() + 1).toString();
+            let fullContent = "";
+
+            setMessages(prev => [...prev, {
+                id: msgId,
+                role: 'agent',
+                content: "",
+                isStreaming: true
+            }]);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            const content = data.choices[0]?.delta?.content || "";
+                            fullContent += content;
+
+                            setMessages(prev => prev.map(msg =>
+                                msg.id === msgId
+                                    ? { ...msg, content: renderContentWithTags(fullContent) }
+                                    : msg
+                            ));
+                        } catch (e) {
+                            console.error("Error parsing stream chunk", e);
+                        }
+                    }
+                }
             }
 
-            const aiContent = data.choices[0].message.content;
-
-            const aiMsg: Message = {
-                id: (Date.now() + 1).toString(),
-                role: 'agent',
-                content: <div className="whitespace-pre-wrap">{aiContent}</div>
-            };
-
-            setMessages(prev => [...prev, aiMsg]);
+            setMessages(prev => prev.map(msg =>
+                msg.id === msgId ? { ...msg, isStreaming: false } : msg
+            ));
 
         } catch (error: any) {
+            if (error.name === 'AbortError') return;
             console.error("Groq API Error:", error);
             const errorMsg: Message = {
                 id: Date.now().toString(),
                 role: 'agent',
-                content: `Error: ${error.message || "Unknown error occurred"}. Check console for details.`
+                content: `Error: ${error.message}. Please check your connection or API key.`
             };
             setMessages(prev => [...prev, errorMsg]);
         } finally {
             setIsTyping(false);
+            abortControllerRef.current = null;
         }
+    };
+
+    const renderContentWithTags = (text: string) => {
+        // Split by tags but keep the text parts
+        const parts = text.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}})/g);
+
+        return (
+            <div className="whitespace-pre-wrap">
+                {parts.map((part, index) => {
+                    if (part === '{{PROJECTS}}') {
+                        return (
+                            <div key={index} className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+                                {portfolioData.projects.map(p => (
+                                    <ProjectCard key={p.id} project={p} />
+                                ))}
+                            </div>
+                        );
+                    }
+                    if (part === '{{SKILLS}}') {
+                        return (
+                            <div key={index} className="mt-4 not-prose">
+                                <SkillsDisplay skills={portfolioData.skills} />
+                            </div>
+                        );
+                    }
+                    if (part === '{{RESUME}}') {
+                        return (
+                            <div key={index} className="mt-4 not-prose">
+                                <a
+                                    href={portfolioData.resumeUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                                >
+                                    <Download size={20} />
+                                    Download Resume
+                                </a>
+                            </div>
+                        );
+                    }
+                    // Return text content
+                    return <span key={index}>{part}</span>;
+                })}
+            </div>
+        );
     };
 
     return (
@@ -141,14 +231,15 @@ const ChatInterface: React.FC = () => {
                     <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
                 ))}
 
-                {isTyping && (
+                {isTyping && !messages.some(m => m.isStreaming) && (
                     <div className="flex w-full mb-6 justify-start animate-pulse">
                         <div className="flex max-w-[85%] flex-row gap-3">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white text-black">
                                 <Terminal size={18} />
                             </div>
-                            <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-gray-900 border border-gray-800 text-gray-400 text-sm flex items-center">
-                                Processing query...
+                            <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-gray-900 border border-gray-800 text-gray-400 text-sm flex items-center gap-2">
+                                <Sparkles size={14} className="text-yellow-500" />
+                                Thinking...
                             </div>
                         </div>
                     </div>
@@ -169,7 +260,7 @@ const ChatInterface: React.FC = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder="Ask something..."
-                        className="flex-1 bg-transparent text-white px-2 py-1 outline-none placeholder:text-gray-500"
+                        className="flex-1 bg-transparent text-white px-2 py-1 outline-none placeholder:text-gray-500 font-sans"
                     />
                     <button
                         type="submit"
