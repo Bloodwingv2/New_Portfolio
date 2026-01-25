@@ -5,14 +5,18 @@ import SplashScreen from './components/SplashScreen';
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [hasStarted, setHasStarted] = useState(false);
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
       {loading ? (
         <SplashScreen onComplete={() => setLoading(false)} />
       ) : (
-        <Layout>
-          <ChatInterface />
+        <Layout onHomeClick={() => setHasStarted(false)}>
+          <ChatInterface
+            hasStarted={hasStarted}
+            onStart={() => setHasStarted(true)}
+          />
         </Layout>
       )}
     </div>

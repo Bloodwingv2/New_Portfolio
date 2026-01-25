@@ -2,6 +2,7 @@ export const portfolioData = {
     name: "Mirang Bhandari",
     role: "Software Engineer & AI Researcher",
     location: "Mannheim, Germany",
+    profileImage: "me.jpg", // Update this with your actual image path (e.g., /profile.jpg)
     bio: `I am a software engineer who loves experimentation, building impactful software, contributing to open source and reading up on tech documentation.
   
   I’m currently a Data Science & AI Grad student at SRH Heidelberg. I build data-driven and AI-powered solutions, combining Data Acquisition, Machine Learning, Backend, DevOps and Cloud Technologies to turn complex data into actionable insights for companies.`,
