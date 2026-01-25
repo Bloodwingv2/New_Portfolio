@@ -1,11 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --color-black: #0a0a0a;
-  --color-gray-900: #171717;
-  --color-gray-800: #262626;
-  --color-gray-700: #404040;
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-display: 'Orbitron', system-ui, sans-serif;
+  --color-black: #050505;
+  --color-gray-900: #121212;
+  --color-gray-800: #1E1E1E;
+  --color-gray-700: #2D2D2D;
 }
 
 body {
