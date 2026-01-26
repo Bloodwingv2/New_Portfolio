@@ -122,3 +122,5 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ role, content }) =
         </div>
     );
 });
+
+export default ChatMessage;

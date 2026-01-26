@@ -20,9 +20,11 @@ type Message = {
 interface ChatInterfaceProps {
     hasStarted: boolean;
     onStart: () => void;
+    activePrompt: string | null;
+    onPromptHandled: () => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, activePrompt, onPromptHandled }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState("");
     const [isTyping, setIsTyping] = useState(false);
@@ -33,6 +35,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart }) =>
     const chatRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
+
+    // Handle External Prompts (Sidebar)
+    useEffect(() => {
+        if (activePrompt) {
+            handleSendMessage(activePrompt);
+            onPromptHandled();
+        }
+    }, [activePrompt]);
 
     // Initial greeting
     useEffect(() => {
