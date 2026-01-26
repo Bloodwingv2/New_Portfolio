@@ -7,10 +7,26 @@ export const portfolioData = {
   
   I’m currently a Data Science & AI Grad student at SRH Heidelberg. I build data-driven and AI-powered solutions, combining Data Acquisition, Machine Learning, Backend, DevOps and Cloud Technologies to turn complex data into actionable insights for companies.`,
     skills: [
-        "React", "TypeScript", "Node.js", "Python",
-        "Machine Learning", "Data Science", "AWS", "Docker",
-        "PostgreSQL", "TailwindCSS", "Next.js", "GraphQL",
-        "TensorFlow", "PyTorch", "MLOps"
+        {
+            title: "Programming Languages",
+            icon: "code",
+            skills: ["Python", "TypeScript", "JavaScript", "SQL", "C++"]
+        },
+        {
+            title: "AI & Data Science",
+            icon: "cpu",
+            skills: ["TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "Computer Vision", "NLP"]
+        },
+        {
+            title: "Web & Backend",
+            icon: "globe",
+            skills: ["React", "Next.js", "Node.js", "PostgreSQL", "GraphQL", "FastAPI"]
+        },
+        {
+            title: "Tools & Cloud",
+            icon: "tool",
+            skills: ["Docker", "AWS", "Git", "Linux", "CI/CD", "MLOps"]
+        }
     ],
     projects: [
         {

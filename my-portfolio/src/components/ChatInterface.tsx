@@ -125,7 +125,109 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         generateResponseStream(text);
     };
 
+    const getPredefinedResponse = (input: string): string | null => {
+        const normalizedInput = input.trim().toLowerCase();
+
+        // 1. "Tell me about yourself"
+        if (
+            normalizedInput.includes("tell me about yourself") ||
+            normalizedInput === "who are you?" ||
+            normalizedInput === "who are you"
+        ) {
+            return portfolioData.bio;
+        }
+
+        // 2. "Show me your projects"
+        if (
+            normalizedInput.includes("show me your projects") ||
+            normalizedInput.includes("list your projects") ||
+            (normalizedInput.includes("projects") && normalizedInput.length < 20)
+        ) {
+            return "Here are some of the key projects I've worked on recently:\n\n{{PROJECTS}}";
+        }
+
+        // 3. "What are your skills?"
+        if (
+            normalizedInput.includes("what are your skills") ||
+            normalizedInput.includes("technical skills") ||
+            (normalizedInput.includes("skills") && normalizedInput.length < 20)
+        ) {
+            return "I have experience with a wide range of technologies in AI, Data Science, and Web Development. Here's my technical stack:\n\n{{SKILLS}}";
+        }
+
+        // 4. "Do you have a resume?"
+        if (
+            normalizedInput.includes("resume") ||
+            normalizedInput.includes("cv") ||
+            normalizedInput.includes("download resume")
+        ) {
+            return "Yes! You can view and download my full resume using the button below.\n\n{{RESUME}}";
+        }
+
+        // 5. "Surprise me!"
+        if (
+            normalizedInput.includes("surprise me") ||
+            normalizedInput.includes("fun fact")
+        ) {
+            const randomFact = portfolioData.funFacts[Math.floor(Math.random() * portfolioData.funFacts.length)];
+            return `Here's a fun fact about me: ${randomFact}`;
+        }
+
+        return null;
+    };
+
+    const streamLocalResponse = async (responseText: string) => {
+        const msgId = (Date.now() + 1).toString();
+
+        setMessages(prev => [...prev, {
+            id: msgId,
+            role: 'agent',
+            content: "",
+            isStreaming: true
+        }]);
+
+        setIsTyping(true);
+        abortControllerRef.current = new AbortController();
+
+        // Simulate network delay for realism
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        let currentText = "";
+        const chunkSize = 4; // Characters per tick
+
+        for (let i = 0; i < responseText.length; i += chunkSize) {
+            if (abortControllerRef.current?.signal.aborted) break;
+
+            const chunk = responseText.slice(i, i + chunkSize);
+            currentText += chunk;
+
+            setMessages(prev => prev.map(msg =>
+                msg.id === msgId
+                    ? { ...msg, content: renderContentWithTags(currentText) }
+                    : msg
+            ));
+
+            // Random typing delay
+            await new Promise(resolve => setTimeout(resolve, 10 + Math.random() * 20));
+        }
+
+        setMessages(prev => prev.map(msg =>
+            msg.id === msgId ? { ...msg, isStreaming: false } : msg
+        ));
+
+        setIsTyping(false);
+        abortControllerRef.current = null;
+    };
+
     const generateResponseStream = async (input: string) => {
+        // 1. Check for local predefined response
+        const localResponse = getPredefinedResponse(input);
+        if (localResponse) {
+            await streamLocalResponse(localResponse);
+            return;
+        }
+
+        // 2. Fallback to LLM API
         const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
         if (!apiKey) {
@@ -140,6 +242,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         }
 
         abortControllerRef.current = new AbortController();
+
+        // Artificial delay for "processing" feel
+        await new Promise(resolve => setTimeout(resolve, 1200));
 
         try {
             const systemPrompt = `You are an interactive AI portfolio assistant for Mirang Bhandari.
@@ -186,7 +291,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 signal: abortControllerRef.current.signal
             });
 
-            if (!response.ok) throw new Error(response.statusText);
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => response.statusText);
+                throw new Error(`API Error ${response.status}: ${errorText || response.statusText}`);
+            }
             if (!response.body) throw new Error("No response body");
 
             const reader = response.body.getReader();
@@ -290,10 +398,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     />
                     <div className="absolute bottom-2 right-2 w-5 h-5 md:w-6 md:h-6 bg-green-500 border-4 border-black rounded-full z-20"></div>
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 md:mb-6 text-center tracking-tight">
+                <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6 text-center tracking-tight">
                     Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">{portfolioData.name}</span>
                 </h2>
-                <p className="text-gray-400 text-center max-w-lg text-base md:text-lg leading-relaxed px-4">
+                <p className="text-gray-400 text-center max-w-lg text-base md:text-md leading-relaxed px-4">
                     {portfolioData.role}. Ask me anything about my work, skills, or experience.
                 </p>
             </div>
@@ -315,7 +423,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                                     <Terminal size={18} />
                                 </div>
                                 <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-gray-900 border border-gray-800 text-gray-400 text-sm flex items-center gap-2">
-                                    <Sparkles size={14} className="text-yellow-500" />
                                     Thinking...
                                 </div>
                             </div>

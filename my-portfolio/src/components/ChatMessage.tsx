@@ -62,13 +62,16 @@ const RichMessageContent: React.FC<{ content: string }> = ({ content }) => {
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
-                                strong: ({ node, ...props }: any) => <span className="font-bold text-white bg-white/10 px-1 rounded" {...props} />,
-                                ul: ({ node, ...props }: any) => <ul className="list-disc list-inside my-2 space-y-1" {...props} />,
-                                ol: ({ node, ...props }: any) => <ol className="list-decimal list-inside my-2 space-y-1" {...props} />,
-                                li: ({ node, ...props }: any) => <li className="ml-2" {...props} />,
-                                p: ({ node, ...props }: any) => <p className="mb-2 last:mb-0 inline" {...props} />,
-                                a: ({ node, ...props }: any) => <a className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                                code: ({ node, ...props }: any) => <code className="bg-black/30 px-1 py-0.5 rounded font-mono text-sm text-yellow-300" {...props} />,
+                                strong: ({ node, ...props }: any) => <span className="font-semibold text-white" {...props} />,
+                                ul: ({ node, ...props }: any) => <ul className="list-disc list-outside ml-4 my-3 space-y-1 text-gray-300" {...props} />,
+                                ol: ({ node, ...props }: any) => <ol className="list-decimal list-outside ml-4 my-3 space-y-1 text-gray-300" {...props} />,
+                                li: ({ node, ...props }: any) => <li className="pl-1 leading-relaxed" {...props} />,
+                                p: ({ node, ...props }: any) => <p className="mb-3 last:mb-0 leading-7 text-gray-200" {...props} />,
+                                a: ({ node, ...props }: any) => <a className="text-blue-400 hover:text-blue-300 hover:underline transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
+                                code: ({ node, ...props }: any) => <code className="bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono text-yellow-200" {...props} />,
+                                h1: ({ node, ...props }: any) => <h1 className="text-xl font-bold text-white mb-2 mt-4" {...props} />,
+                                h2: ({ node, ...props }: any) => <h2 className="text-lg font-bold text-white mb-2 mt-4" {...props} />,
+                                h3: ({ node, ...props }: any) => <h3 className="text-base font-bold text-white mb-1 mt-3" {...props} />,
                             }}
                         >
                             {part}
