@@ -121,12 +121,12 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                     />
                 </div>
 
-                <p
+                {/*<p
                     ref={hintRef}
                     className="mt-4 text-xs font-mono text-green-500/50 opacity-0 tracking-wider"
                 >
                     System Initialized. Type 'help' for commands.
-                </p>
+                </p>*/}
             </div>
 
             {/* Optional Overlay for different exit effect if needed, currently using opacity fade */}

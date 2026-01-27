@@ -1,5 +1,6 @@
 import React from 'react';
 import { portfolioData } from '../data/portfolioData';
+import { Github, Linkedin, Twitter, Mail, ExternalLink } from 'lucide-react';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -24,9 +25,25 @@ const Layout: React.FC<LayoutProps> = ({ children, onHomeClick }) => {
                         <span className="text-gray-500 group-hover:text-gray-300 transition-colors">Agentic Portfolio</span>
                     </h1>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span className="text-xs text-gray-400 uppercase tracking-wider">Online</span>
+                <div className="flex items-center gap-4">
+                    {portfolioData.socials.map((social) => {
+                        const Icon = social.name.includes('GitHub') ? Github :
+                            social.name.includes('LinkedIn') ? Linkedin :
+                                social.name.includes('Twitter') ? Twitter :
+                                    social.name.includes('Email') ? Mail : ExternalLink;
+                        return (
+                            <a
+                                key={social.name}
+                                href={social.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gray-500 hover:text-white transition-colors"
+                                title={social.name}
+                            >
+                                <Icon size={20} />
+                            </a>
+                        );
+                    })}
                 </div>
             </header>
             <main className="flex-1 overflow-hidden flex flex-col relative">
