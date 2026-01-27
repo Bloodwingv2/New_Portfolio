@@ -3,12 +3,9 @@ import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import ChatMessage from './ChatMessage';
 import ActionButtons from './ActionButtons';
-import ProjectCard from './ProjectCard';
-import SkillsDisplay from './SkillsDisplay';
 import { portfolioData, suggestPrompts } from '../data/portfolioData';
-import { Send, Terminal, Download, Sparkles } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { Send, Terminal } from 'lucide-react';
+
 
 type Message = {
     id: string;
@@ -35,6 +32,24 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
     const chatRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
+    // Scroll handling
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const shouldAutoScrollRef = useRef(true);
+
+    const scrollToBottom = (instant = false) => {
+        if (bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: instant ? 'auto' : 'smooth' });
+        }
+    };
+
+    // Monitor scroll position
+    const handleScroll = () => {
+        if (messagesContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+            const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+            shouldAutoScrollRef.current = isAtBottom;
+        }
+    };
 
     // Handle External Prompts (Sidebar)
     useEffect(() => {
@@ -98,12 +113,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         }
     }, { scope: containerRef, dependencies: [hasStarted] });
 
-    // Auto-scroll
+    // Auto-scroll on new messages (start of generation)
     useEffect(() => {
         if (hasStarted) {
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            scrollToBottom();
+            shouldAutoScrollRef.current = true;
         }
-    }, [messages, isTyping, hasStarted]);
+    }, [messages.length, hasStarted]);
+
+    // Auto-scroll during streaming (only if already at bottom)
+    useEffect(() => {
+        if (isTyping && shouldAutoScrollRef.current) {
+            scrollToBottom(true); // Instant scroll to prevent jitter
+        }
+    }, [messages, isTyping]);
 
     const handleSendMessage = (text: string) => {
         if (!text.trim()) return;
@@ -203,7 +226,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
 
             setMessages(prev => prev.map(msg =>
                 msg.id === msgId
-                    ? { ...msg, content: renderContentWithTags(currentText) }
+                    ? { ...msg, content: currentText }
                     : msg
             ));
 
@@ -310,6 +333,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 isStreaming: true
             }]);
 
+            let lastUpdateTime = 0;
+            const THROTTLE_MS = 50;
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
@@ -324,11 +350,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                             const content = data.choices[0]?.delta?.content || "";
                             fullContent += content;
 
-                            setMessages(prev => prev.map(msg =>
-                                msg.id === msgId
-                                    ? { ...msg, content: renderContentWithTags(fullContent) }
-                                    : msg
-                            ));
+                            const now = Date.now();
+                            if (now - lastUpdateTime > THROTTLE_MS) {
+                                setMessages(prev => prev.map(msg =>
+                                    msg.id === msgId
+                                        ? { ...msg, content: fullContent }
+                                        : msg
+                                ));
+                                lastUpdateTime = now;
+                            }
                         } catch (e) {
                             console.error("Error parsing stream chunk", e);
                         }
@@ -336,8 +366,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 }
             }
 
+            // Ensure final content is set
             setMessages(prev => prev.map(msg =>
-                msg.id === msgId ? { ...msg, isStreaming: false } : msg
+                msg.id === msgId
+                    ? { ...msg, content: fullContent, isStreaming: false }
+                    : msg
             ));
 
         } catch (error: any) {
@@ -353,33 +386,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             setIsTyping(false);
             abortControllerRef.current = null;
         }
-    };
-
-    const renderContentWithTags = (text: string) => {
-        const parts = text.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}})/g);
-        return (
-            <div className="whitespace-pre-wrap">
-                {parts.map((part, index) => {
-                    if (part === '{{PROJECTS}}') return (<div key={index} className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">{portfolioData.projects.map(p => <ProjectCard key={p.id} project={p} />)}</div>);
-                    if (part === '{{SKILLS}}') return (<div key={index} className="mt-4 not-prose"><SkillsDisplay skills={portfolioData.skills} /></div>);
-                    if (part === '{{RESUME}}') return (<div key={index} className="mt-4 not-prose"><a href={portfolioData.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors"><Download size={20} />Download Resume</a></div>);
-                    if (!part.trim()) return null;
-                    return (
-                        <div key={index} className="inline-block w-full">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-                                strong: ({ node, ...props }: any) => <span className="font-bold text-white bg-white/10 px-1 rounded" {...props} />,
-                                ul: ({ node, ...props }: any) => <ul className="list-disc list-inside my-2 space-y-1" {...props} />,
-                                ol: ({ node, ...props }: any) => <ol className="list-decimal list-inside my-2 space-y-1" {...props} />,
-                                li: ({ node, ...props }: any) => <li className="ml-2" {...props} />,
-                                p: ({ node, ...props }: any) => <p className="mb-2 last:mb-0 inline" {...props} />,
-                                a: ({ node, ...props }: any) => <a className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                                code: ({ node, ...props }: any) => <code className="bg-black/30 px-1 py-0.5 rounded font-mono text-sm text-yellow-300" {...props} />,
-                            }}>{part}</ReactMarkdown>
-                        </div>
-                    );
-                })}
-            </div>
-        );
     };
 
     return (
@@ -411,7 +417,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 ref={chatRef}
                 className="flex-1 flex flex-col overflow-hidden opacity-0 hidden"
             >
-                <div className="flex-1 overflow-y-auto px-2 py-4">
+                <div
+                    ref={messagesContainerRef}
+                    onScroll={handleScroll}
+                    className="flex-1 overflow-y-auto px-2 py-4"
+                >
                     {messages.map((msg) => (
                         <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
                     ))}

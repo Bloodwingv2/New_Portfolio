@@ -1,7 +1,6 @@
-import React, { useRef } from 'react';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-import { ExternalLink, ArrowUpRight, FolderOpen } from 'lucide-react';
+import React from 'react';
+import { ArrowUpRight, FolderOpen } from 'lucide-react';
+
 
 interface Project {
     id: string;
@@ -16,42 +15,12 @@ interface ProjectCardProps {
     project: Project;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
-    const cardRef = useRef<HTMLAnchorElement>(null);
-    const arrowRef = useRef<HTMLDivElement>(null);
-
-    useGSAP(() => {
-        const card = cardRef.current;
-        if (!card) return;
-
-        const hoverTl = gsap.timeline({ paused: true });
-
-        hoverTl.to(arrowRef.current, {
-            x: 2,
-            y: -2,
-            opacity: 1,
-            duration: 0.2,
-            ease: "power2.out"
-        }, 0);
-
-        const onEnter = () => hoverTl.play();
-        const onLeave = () => hoverTl.reverse();
-
-        card.addEventListener('mouseenter', onEnter);
-        card.addEventListener('mouseleave', onLeave);
-
-        return () => {
-            card.removeEventListener('mouseenter', onEnter);
-            card.removeEventListener('mouseleave', onLeave);
-        };
-    }, { scope: cardRef });
-
+const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project }) => {
     return (
         <a
             href={project.link}
             target="_blank"
             rel="noopener noreferrer"
-            ref={cardRef}
             className="group flex flex-col bg-black border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-600 transition-colors h-full"
         >
             {/* Minimal Header */}
@@ -69,7 +38,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                         </span>
                     </div>
                 </div>
-                <div ref={arrowRef} className="text-gray-500 opacity-50 transition-opacity">
+                <div className="text-gray-500 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200">
                     <ArrowUpRight size={18} />
                 </div>
             </div>
@@ -88,6 +57,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             </div>
         </a>
     );
-};
+});
 
 export default ProjectCard;

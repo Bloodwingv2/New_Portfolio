@@ -13,7 +13,7 @@ interface SkillsDisplayProps {
     skills: SkillCategory[];
 }
 
-const SkillsDisplay: React.FC<SkillsDisplayProps> = ({ skills }) => {
+const SkillsDisplay: React.FC<SkillsDisplayProps> = React.memo(({ skills }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
@@ -24,7 +24,7 @@ const SkillsDisplay: React.FC<SkillsDisplayProps> = ({ skills }) => {
             stagger: 0.1,
             ease: "power2.out"
         });
-    }, { scope: containerRef });
+    }, { scope: containerRef, dependencies: [] }); // Run only once
 
     const getIcon = (name: string) => {
         switch (name) {
@@ -60,6 +60,6 @@ const SkillsDisplay: React.FC<SkillsDisplayProps> = ({ skills }) => {
             ))}
         </div>
     );
-};
+});
 
 export default SkillsDisplay;

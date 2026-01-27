@@ -87,7 +87,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                     {mainText.split("").map((char, index) => (
                         <span
                             key={index}
-                            ref={el => letterRefs.current[index] = el}
+                            ref={(el) => { letterRefs.current[index] = el; }}
                             className="text-6xl sm:text-8xl md:text-9xl font-black tracking-tighter font-display text-transparent bg-clip-text bg-gradient-to-b from-gray-100 to-gray-600 inline-block"
                         >
                             {char}

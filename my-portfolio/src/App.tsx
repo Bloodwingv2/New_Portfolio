@@ -16,6 +16,8 @@ function App() {
           <ChatInterface
             hasStarted={hasStarted}
             onStart={() => setHasStarted(true)}
+            activePrompt={null}
+            onPromptHandled={() => { }}
           />
         </Layout>
       )}
