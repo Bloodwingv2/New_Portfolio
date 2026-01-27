@@ -8,7 +8,7 @@ interface ActionButtonsProps {
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect }) => {
     return (
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-4 p-1">
             {prompts.map((prompt, index) => (
                 <button
                     key={index}

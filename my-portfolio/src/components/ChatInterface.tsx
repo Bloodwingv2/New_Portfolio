@@ -100,7 +100,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     y: 0,
                     duration: 0.5,
                     pointerEvents: 'all'
-                }, "-=0.1");
+                });
         } else {
             // Animate Hero IN, Chat OUT
             const tl = gsap.timeline();
@@ -334,6 +334,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         const localResponse = getPredefinedResponse(input);
         if (localResponse) {
             if (localResponse === "{{CONTACT_FORM}}") {
+                setIsTyping(true);
+                // Simulate "initializing secure channel"
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
                 const msgId = (Date.now() + 1).toString();
                 setMessages(prev => [...prev, {
                     id: msgId,
@@ -490,7 +494,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             {/* Hero Section */}
             <div
                 ref={heroRef}
-                className="absolute inset-0 z-10 bg-black flex flex-col items-center justify-center p-4 pb-32"
+                className="flex-1 w-full bg-black flex flex-col items-center justify-center p-4 overflow-y-auto"
             >
                 <div className="relative mb-6 md:mb-8 group">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
@@ -577,7 +581,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             </button>
 
             {/* Input Area - Always visible but styled to blend */}
-            <div className="mt-auto pt-4 border-t border-gray-800 bg-black z-20 pb-2">
+            <div className="pt-4 border-t border-gray-800 bg-black z-20 pb-2">
                 <ActionButtons prompts={suggestPrompts} onSelect={handleSendMessage} />
 
                 <form

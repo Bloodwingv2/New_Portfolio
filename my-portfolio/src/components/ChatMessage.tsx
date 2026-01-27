@@ -18,9 +18,17 @@ interface ChatMessageProps {
 
 const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect: (p: any) => void }> = ({ projects, onSelect }) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
+    const [itemsPerPage, setItemsPerPage] = React.useState(2);
 
-    // Show 2 projects at a time, advance by 1
-    const itemsPerPage = 2;
+    React.useEffect(() => {
+        const handleResize = () => {
+            setItemsPerPage(window.innerWidth < 768 ? 1 : 2);
+        };
+        handleResize(); // Initial check
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const maxIndex = Math.max(0, projects.length - itemsPerPage);
 
     const nextSlide = () => {
@@ -38,14 +46,17 @@ const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect:
     return (
         <div className="relative w-full max-w-[640px] mx-auto my-6">
 
-            {/* Main Stage - Shows 2 cards */}
+            {/* Main Stage - Shows 2 cards (desktop) or 1 (mobile) */}
             <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm relative h-80 sm:h-96">
                 <div
                     className="flex transition-transform duration-500 ease-in-out h-full"
-                    style={{ transform: `translateX(-${currentIndex * 50}%)` }}
+                    style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
                 >
                     {projects.map((p) => (
-                        <div key={p.id} className="w-1/2 shrink-0 p-3 flex items-center justify-center h-full">
+                        <div
+                            key={p.id}
+                            className={`shrink-0 p-3 flex items-center justify-center h-full ${itemsPerPage === 1 ? 'w-full' : 'w-1/2'}`}
+                        >
                             <div className="w-full h-full transform transition-all duration-300 hover:scale-105">
                                 <ProjectCard project={p} onClick={() => onSelect(p)} />
                             </div>
@@ -58,17 +69,17 @@ const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect:
             <button
                 onClick={prevSlide}
                 disabled={currentIndex === 0}
-                className="absolute -left-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
+                className="absolute -left-3 sm:-left-12 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
             >
-                <ChevronLeft size={28} />
+                <ChevronLeft size={24} className="sm:w-7 sm:h-7" />
             </button>
 
             <button
                 onClick={nextSlide}
                 disabled={currentIndex >= maxIndex}
-                className="absolute -right-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
+                className="absolute -right-3 sm:-right-12 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
             >
-                <ChevronRight size={28} />
+                <ChevronRight size={24} className="sm:w-7 sm:h-7" />
             </button>
 
             {/* Pagination Dots - One dot per slide position */}
