@@ -1,7 +1,7 @@
 import React, { useRef, useMemo } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Bot, User, Download } from 'lucide-react';
+import { Bot, User, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { portfolioData } from '../data/portfolioData';
 import ProjectCard from './ProjectCard';
 import SkillsDisplay from './SkillsDisplay';
@@ -12,9 +12,77 @@ interface ChatMessageProps {
     role: 'agent' | 'user';
     content: string | React.ReactNode;
     timestamp?: string;
+    onProjectSelect?: (project: any) => void;
 }
 
-const RichMessageContent: React.FC<{ content: string }> = ({ content }) => {
+const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect: (p: any) => void }> = ({ projects, onSelect }) => {
+    const [currentIndex, setCurrentIndex] = React.useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const nextSlide = () => {
+        if (currentIndex < projects.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+        }
+    };
+
+    const prevSlide = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+        }
+    };
+
+    return (
+        <div className="relative w-full max-w-[320px] mx-auto my-6"> {/* Constrained width for stack feel */}
+
+            {/* Main Stage */}
+            <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm relative aspect-[3/4]">
+                <div
+                    className="flex transition-transform duration-500 ease-in-out h-full"
+                    style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                >
+                    {projects.map((p) => (
+                        <div key={p.id} className="w-full shrink-0 h-full p-2 flex items-center justify-center">
+                            <div className="transform scale-95 hover:scale-100 transition-transform duration-300 h-full w-full">
+                                <ProjectCard project={p} onClick={() => onSelect(p)} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Navigation Controls - Absolute Centered vertically, pushed out slightly */}
+            <button
+                onClick={prevSlide}
+                disabled={currentIndex === 0}
+                className="absolute -left-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20"
+            >
+                <ChevronLeft size={32} />
+            </button>
+
+            <button
+                onClick={nextSlide}
+                disabled={currentIndex === projects.length - 1}
+                className="absolute -right-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20"
+            >
+                <ChevronRight size={32} />
+            </button>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-2 mt-4">
+                {projects.map((_, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => setCurrentIndex(idx)}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === currentIndex ? 'bg-blue-500 w-6' : 'bg-gray-700 hover:bg-gray-500'
+                            }`}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project: any) => void }> = ({ content, onProjectSelect }) => {
     // Memoize the expensive parsing logic
     const parts = useMemo(() => {
         if (!content) return [];
@@ -26,10 +94,8 @@ const RichMessageContent: React.FC<{ content: string }> = ({ content }) => {
             {parts.map((part, index) => {
                 if (part === '{{PROJECTS}}') {
                     return (
-                        <div key={index} className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
-                            {portfolioData.projects.map(p => (
-                                <ProjectCard key={p.id} project={p} />
-                            ))}
+                        <div key={index} className="mt-6 mb-2">
+                            <ProjectDeck projects={portfolioData.projects} onSelect={(p) => onProjectSelect?.(p)} />
                         </div>
                     );
                 }
@@ -86,7 +152,7 @@ const RichMessageContent: React.FC<{ content: string }> = ({ content }) => {
 };
 
 // Use React.memo for the entire message component to prevent re-renders of old messages during streaming
-const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ role, content }) => {
+const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ role, content, onProjectSelect }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
@@ -116,7 +182,7 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ role, content }) =
                         }`}>
                         {/* If content is string and agent, use Rich renderer. Else just render node/string */}
                         {role === 'agent' && typeof content === 'string' ? (
-                            <RichMessageContent content={content} />
+                            <RichMessageContent content={content} onProjectSelect={onProjectSelect} />
                         ) : (
                             content
                         )}

@@ -6,6 +6,7 @@ import ActionButtons from './ActionButtons';
 import MatrixEffect from './MatrixEffect';
 import ThinkingVisualizer from './ThinkingVisualizer';
 import Sidebar from './Sidebar';
+import ProjectDetailModal from './ProjectDetailModal';
 import { portfolioData, suggestPrompts } from '../data/portfolioData';
 import { Send, Terminal, Menu, ChevronLeft } from 'lucide-react';
 
@@ -30,6 +31,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
     const [isTyping, setIsTyping] = useState(false);
     const [showMatrix, setShowMatrix] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [selectedProject, setSelectedProject] = useState<any>(null);
 
     // Refs for animations
     const containerRef = useRef<HTMLDivElement>(null);
@@ -455,7 +457,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     className="flex-1 overflow-y-auto px-2 py-4"
                 >
                     {messages.map((msg) => (
-                        <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
+                        <ChatMessage
+                            key={msg.id}
+                            role={msg.role}
+                            content={msg.content}
+                            onProjectSelect={setSelectedProject}
+                        />
                     ))}
 
                     {isTyping && !messages.some(m => m.isStreaming) && (
@@ -474,6 +481,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     <div ref={bottomRef} />
                 </div>
             </div>
+
+            {/* Project Detail Modal */}
+            {selectedProject && (
+                <ProjectDetailModal
+                    project={selectedProject}
+                    onClose={() => setSelectedProject(null)}
+                />
+            )}
 
             {/* Matrix Effect Overlay */}
             {showMatrix && <MatrixEffect onExit={() => setShowMatrix(false)} />}
