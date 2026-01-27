@@ -15,12 +15,16 @@ interface ChatMessageProps {
     onProjectSelect?: (project: any) => void;
 }
 
+
 const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect: (p: any) => void }> = ({ projects, onSelect }) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
-    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Show 2 projects at a time, advance by 1
+    const itemsPerPage = 2;
+    const maxIndex = Math.max(0, projects.length - itemsPerPage);
 
     const nextSlide = () => {
-        if (currentIndex < projects.length - 1) {
+        if (currentIndex < maxIndex) {
             setCurrentIndex(prev => prev + 1);
         }
     };
@@ -32,17 +36,17 @@ const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect:
     };
 
     return (
-        <div className="relative w-full max-w-[320px] mx-auto my-6"> {/* Constrained width for stack feel */}
+        <div className="relative w-full max-w-[640px] mx-auto my-6">
 
-            {/* Main Stage */}
-            <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm relative aspect-[3/4]">
+            {/* Main Stage - Shows 2 cards */}
+            <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900/50 backdrop-blur-sm relative h-80 sm:h-96">
                 <div
                     className="flex transition-transform duration-500 ease-in-out h-full"
-                    style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                    style={{ transform: `translateX(-${currentIndex * 50}%)` }}
                 >
                     {projects.map((p) => (
-                        <div key={p.id} className="w-full shrink-0 h-full p-2 flex items-center justify-center">
-                            <div className="transform scale-95 hover:scale-100 transition-transform duration-300 h-full w-full">
+                        <div key={p.id} className="w-1/2 shrink-0 p-3 flex items-center justify-center h-full">
+                            <div className="w-full h-full transform transition-all duration-300 hover:scale-105">
                                 <ProjectCard project={p} onClick={() => onSelect(p)} />
                             </div>
                         </div>
@@ -50,26 +54,26 @@ const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect:
                 </div>
             </div>
 
-            {/* Navigation Controls - Absolute Centered vertically, pushed out slightly */}
+            {/* Navigation Controls */}
             <button
                 onClick={prevSlide}
                 disabled={currentIndex === 0}
-                className="absolute -left-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20"
+                className="absolute -left-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
             >
-                <ChevronLeft size={32} />
+                <ChevronLeft size={28} />
             </button>
 
             <button
                 onClick={nextSlide}
-                disabled={currentIndex === projects.length - 1}
-                className="absolute -right-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20"
+                disabled={currentIndex >= maxIndex}
+                className="absolute -right-12 top-1/2 -translate-y-1/2 p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
             >
-                <ChevronRight size={32} />
+                <ChevronRight size={28} />
             </button>
 
-            {/* Pagination Dots */}
+            {/* Pagination Dots - One dot per slide position */}
             <div className="flex justify-center gap-2 mt-4">
-                {projects.map((_, idx) => (
+                {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
                     <button
                         key={idx}
                         onClick={() => setCurrentIndex(idx)}
