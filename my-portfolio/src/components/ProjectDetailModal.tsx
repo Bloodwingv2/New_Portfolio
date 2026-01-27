@@ -87,8 +87,11 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project, onClos
                 {/* Header Image Area */}
                 <div className="relative h-48 sm:h-64 w-full bg-gradient-to-br from-gray-900 to-black overflow-hidden group">
                     {/* Placeholder for actual image or creative pattern */}
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+                    <div
+                        className="absolute inset-0 bg-cover bg-center opacity-60 transition-transform duration-700 group-hover:scale-105"
+                        style={{ backgroundImage: `url(${project.image || 'https://grainy-gradients.vercel.app/noise.svg'})` }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
 
                     {/* Abstract tech overlay */}
                     <div className="absolute top-4 right-4 p-2 bg-black/40 backdrop-blur-md rounded-lg border border-white/10">

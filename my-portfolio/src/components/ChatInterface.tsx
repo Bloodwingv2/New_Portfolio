@@ -7,6 +7,7 @@ import MatrixEffect from './MatrixEffect';
 import ThinkingVisualizer from './ThinkingVisualizer';
 import Sidebar from './Sidebar';
 import ProjectDetailModal from './ProjectDetailModal';
+import ContactForm from './ContactForm';
 import { portfolioData, suggestPrompts } from '../data/portfolioData';
 import { Send, Terminal, Menu, ChevronLeft } from 'lucide-react';
 
@@ -212,7 +213,59 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return "I have experience with a wide range of technologies in AI, Data Science, and Web Development. Here's my technical stack:\n\n{{SKILLS}}";
         }
 
-        // 5. "Do you have a resume?"
+        // 5. Work Experience
+        if (
+            normalizedInput.includes("experience") ||
+            normalizedInput.includes("work") ||
+            normalizedInput.includes("employment")
+        ) {
+            const expList = portfolioData.experience.map(exp =>
+                `**${exp.role}** at ${exp.company} (${exp.period})\n${exp.description}`
+            ).join('\n\n');
+            return `Here is my professional experience:\n\n${expList}`;
+        }
+
+        // 6. Certifications
+        if (
+            normalizedInput.includes("certification") ||
+            normalizedInput.includes("certificate")
+        ) {
+            const certList = portfolioData.certifications.map(cert =>
+                `- **${cert.name}** (${cert.issuer}, ${cert.date})`
+            ).join('\n');
+            return `I have the following certifications:\n\n${certList}`;
+        }
+
+        // 7. Hobbies & Interests
+        if (
+            normalizedInput.includes("hobbies") ||
+            normalizedInput.includes("hobby") ||
+            normalizedInput.includes("interest")
+        ) {
+            const hobbies = portfolioData.hobbies.join(', ');
+            const interests = portfolioData.interests.map(i => `**${i.title}**: ${i.description}`).join('\n- ');
+            return `**Hobbies**: ${hobbies}\n\n**Interests**:\n- ${interests}`;
+        }
+
+        // 8. Contact / Socials
+        if (
+            normalizedInput.includes("contact") ||
+            normalizedInput.includes("social") ||
+            normalizedInput.includes("email") ||
+            normalizedInput.includes("reach out")
+        ) {
+            // Check if it's specifically a request for the form
+            if (normalizedInput.includes("form") || normalizedInput.includes("message") || normalizedInput.includes("send") || normalizedInput.includes("contact")) {
+                // We return a special marker string that we'll catch in generateResponseStream or handle immediately?
+                // Actually, getPredefinedResponse returning a string is strictly for text responses.
+                // If I want to return a component, I need to change the logic control flow.
+                return "{{CONTACT_FORM}}";
+            }
+            const socials = portfolioData.socials.map(s => `[${s.name}](${s.url})`).join(' • ');
+            return `You can reach me via:\n\n${socials}`;
+        }
+
+        // 9. "Do you have a resume?"
         if (
             normalizedInput.includes("resume") ||
             normalizedInput.includes("cv") ||
@@ -221,7 +274,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return "Yes! You can view and download my full resume using the button below.\n\n{{RESUME}}";
         }
 
-        // 6. "Surprise me!"
+        // 10. "Surprise me!"
         if (
             normalizedInput.includes("surprise me") ||
             normalizedInput.includes("fun fact")
@@ -280,6 +333,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         // 1. Check for local predefined response
         const localResponse = getPredefinedResponse(input);
         if (localResponse) {
+            if (localResponse === "{{CONTACT_FORM}}") {
+                const msgId = (Date.now() + 1).toString();
+                setMessages(prev => [...prev, {
+                    id: msgId,
+                    role: 'agent',
+                    content: <ContactForm />
+                }]);
+                setIsTyping(false);
+                return;
+            }
             await streamLocalResponse(localResponse);
             return;
         }

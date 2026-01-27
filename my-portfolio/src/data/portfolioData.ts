@@ -1,3 +1,24 @@
+export interface Experience {
+    id: string;
+    role: string;
+    company: string;
+    period: string;
+    description: string;
+}
+
+export interface Certification {
+    name: string;
+    issuer: string;
+    date: string;
+    link?: string;
+}
+
+export interface Interest {
+    title: string;
+    description: string;
+    icon: string;
+}
+
 export const portfolioData = {
     name: "Mirang Bhandari",
     role: "Software Engineer & AI Researcher",
@@ -28,6 +49,44 @@ export const portfolioData = {
             skills: ["Docker", "AWS", "Git", "Linux", "CI/CD", "MLOps"]
         }
     ],
+    experience: [
+        {
+            id: "exp1",
+            role: "Software Engineer",
+            company: "Tech Corp",
+            period: "2023 - Present",
+            description: "Developing scalable web applications and AI solutions."
+        },
+        {
+            id: "exp2",
+            role: "Junior Developer",
+            company: "Startup Inc",
+            period: "2021 - 2023",
+            description: "Built full-stack applications using React and Node.js."
+        }
+    ] as Experience[],
+    certifications: [
+        {
+            name: "AWS Certified Solutions Architect",
+            issuer: "Amazon Web Services",
+            date: "2024"
+        },
+        {
+            name: "TensorFlow Developer Certificate",
+            issuer: "Google",
+            date: "2023"
+        }
+    ] as Certification[],
+    hobbies: [
+        "Photography",
+        "Hiking",
+        "Reading Sci-Fi",
+        "Gaming"
+    ],
+    interests: [
+        { title: "Generative AI", description: "Exploring LLMs and image generation models.", icon: "brain" },
+        { title: "Open Source", description: "Contributing to community-driven projects.", icon: "github" }
+    ] as Interest[],
     projects: [
         {
             id: "mindwell",
@@ -80,6 +139,8 @@ export const suggestPrompts = [
     "Tell me about yourself",
     "Show me your projects",
     "What are your skills?",
-    "Do you have a resume?",
-    "Surprise me!"
+    "Work Experience",
+    "Certifications",
+    "My Hobbies",
+    "Contact Me"
 ];
