@@ -3,8 +3,11 @@ import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import ChatMessage from './ChatMessage';
 import ActionButtons from './ActionButtons';
+import MatrixEffect from './MatrixEffect';
+import ThinkingVisualizer from './ThinkingVisualizer';
+import Sidebar from './Sidebar';
 import { portfolioData, suggestPrompts } from '../data/portfolioData';
-import { Send, Terminal } from 'lucide-react';
+import { Send, Terminal, Menu, ChevronLeft } from 'lucide-react';
 
 
 type Message = {
@@ -25,6 +28,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+    const [showMatrix, setShowMatrix] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Refs for animations
     const containerRef = useRef<HTMLDivElement>(null);
@@ -135,6 +140,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             onStart();
         }
 
+        // Check for special commands
+        if (processCommand(text)) {
+            setInputValue("");
+            return;
+        }
+
         const userMsg: Message = {
             id: Date.now().toString(),
             role: 'user',
@@ -148,10 +159,31 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         generateResponseStream(text);
     };
 
+    const processCommand = (input: string): boolean => {
+        const cmd = input.trim().toLowerCase();
+
+        if (cmd === 'clear' || cmd === 'cls' || cmd === 'flush_log') {
+            setMessages([]);
+            return true;
+        }
+
+        if (cmd === 'matrix') {
+            setShowMatrix(true);
+            return true;
+        }
+
+        return false;
+    };
+
     const getPredefinedResponse = (input: string): string | null => {
         const normalizedInput = input.trim().toLowerCase();
 
-        // 1. "Tell me about yourself"
+        // 1. Commands
+        if (normalizedInput === 'help') {
+            return `System Manual:\n\n- \`clear\`: Clear terminal\n- \`matrix\`: Enter the simulation`;
+        }
+
+        // 2. "Tell me about yourself"
         if (
             normalizedInput.includes("tell me about yourself") ||
             normalizedInput === "who are you?" ||
@@ -160,7 +192,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return portfolioData.bio;
         }
 
-        // 2. "Show me your projects"
+        // 3. "Show me your projects"
         if (
             normalizedInput.includes("show me your projects") ||
             normalizedInput.includes("list your projects") ||
@@ -169,7 +201,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return "Here are some of the key projects I've worked on recently:\n\n{{PROJECTS}}";
         }
 
-        // 3. "What are your skills?"
+        // 4. "What are your skills?"
         if (
             normalizedInput.includes("what are your skills") ||
             normalizedInput.includes("technical skills") ||
@@ -178,7 +210,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return "I have experience with a wide range of technologies in AI, Data Science, and Web Development. Here's my technical stack:\n\n{{SKILLS}}";
         }
 
-        // 4. "Do you have a resume?"
+        // 5. "Do you have a resume?"
         if (
             normalizedInput.includes("resume") ||
             normalizedInput.includes("cv") ||
@@ -187,7 +219,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return "Yes! You can view and download my full resume using the button below.\n\n{{RESUME}}";
         }
 
-        // 5. "Surprise me!"
+        // 6. "Surprise me!"
         if (
             normalizedInput.includes("surprise me") ||
             normalizedInput.includes("fun fact")
@@ -433,7 +465,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                                     <Terminal size={18} />
                                 </div>
                                 <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-gray-900 border border-gray-800 text-gray-400 text-sm flex items-center gap-2">
-                                    Thinking...
+                                    <ThinkingVisualizer />
+                                    <span className="text-xs text-gray-500 font-mono self-center ml-2">Process(pid=404)</span>
                                 </div>
                             </div>
                         </div>
@@ -441,6 +474,29 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     <div ref={bottomRef} />
                 </div>
             </div>
+
+            {/* Matrix Effect Overlay */}
+            {showMatrix && <MatrixEffect onExit={() => setShowMatrix(false)} />}
+
+            {/* Sidebar */}
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                onClear={() => setMessages([])}
+                onCommandSelect={handleSendMessage}
+            />
+
+            {/* Toggle Sidebar Button - Animate with Sidebar */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className={`fixed top-1/2 -translate-y-1/2 z-[60] p-3 text-gray-400 hover:text-white bg-[#171717] border border-[#2f2f2f] transition-all duration-300 ease-out shadow-xl ${isSidebarOpen
+                    ? 'left-80 rounded-r-xl border-l-[#171717]'
+                    : 'left-0 rounded-r-xl border-l-0'
+                    }`}
+                aria-label="Toggle Menu"
+            >
+                {isSidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
+            </button>
 
             {/* Input Area - Always visible but styled to blend */}
             <div className="mt-auto pt-4 border-t border-gray-800 bg-black z-20 pb-2">

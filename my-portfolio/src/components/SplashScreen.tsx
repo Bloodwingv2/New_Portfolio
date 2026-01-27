@@ -11,6 +11,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const subTextRef = useRef<HTMLParagraphElement>(null);
     const loaderRef = useRef<HTMLDivElement>(null);
+    const hintRef = useRef<HTMLParagraphElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -25,6 +26,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         gsap.set(letters, { y: 120, opacity: 0, scale: 0.8 });
         gsap.set(subTextRef.current, { opacity: 0, y: 30 });
         gsap.set(loaderRef.current, { scaleX: 0, transformOrigin: "left" });
+        gsap.set(hintRef.current, { opacity: 0, y: 10 });
         gsap.set(overlayRef.current, { yPercent: 100 });
 
         // Animation Sequence
@@ -52,13 +54,23 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                 duration: 1.5,
                 ease: "expo.inOut"
             })
+            .to(hintRef.current, {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                ease: "power2.out"
+            }, "-=0.5")
             // Exit sequence
+            .to([loaderRef.current, hintRef.current], {
+                opacity: 0,
+                duration: 0.3
+            })
             .to(loaderRef.current, {
                 scaleY: 0,
                 transformOrigin: "bottom",
                 duration: 0.3,
                 ease: "power2.in"
-            })
+            }, "<")
             .to(containerRef.current, {
                 opacity: 0,
                 scale: 1.05,
@@ -108,6 +120,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
                         className="absolute inset-0 bg-white shadow-[0_0_20px_rgba(255,255,255,0.5)]"
                     />
                 </div>
+
+                <p
+                    ref={hintRef}
+                    className="mt-4 text-xs font-mono text-green-500/50 opacity-0 tracking-wider"
+                >
+                    System Initialized. Type 'help' for commands.
+                </p>
             </div>
 
             {/* Optional Overlay for different exit effect if needed, currently using opacity fade */}
