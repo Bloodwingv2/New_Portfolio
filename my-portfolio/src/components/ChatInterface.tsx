@@ -497,16 +497,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 className="flex-1 w-full bg-black flex flex-col items-center justify-center p-4 overflow-y-auto"
             >
                 <div className="relative mb-6 md:mb-8 group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                    {/* Background Glow - Removed for cleaner look */}
                     <img
                         src={portfolioData.profileImage}
                         alt={portfolioData.name}
-                        className="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-800 shadow-2xl relative z-10"
+                        className="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-900 shadow-2xl relative z-10"
                     />
-                    <div className="absolute bottom-2 right-2 w-5 h-5 md:w-6 md:h-6 bg-green-500 border-4 border-black rounded-full z-20"></div>
+                    <div className="absolute bottom-2 right-2 w-5 h-5 md:w-6 md:h-6 bg-blue-500 border-4 border-black rounded-full z-20"></div>
                 </div>
                 <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6 text-center tracking-tight">
-                    Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">{portfolioData.name}</span>
+                    Hi, I'm {portfolioData.name}
                 </h2>
                 <p className="text-gray-400 text-center max-w-lg text-base md:text-md leading-relaxed px-4">
                     {portfolioData.role}. Ask me anything about my work, skills, or experience.
