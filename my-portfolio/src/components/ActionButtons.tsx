@@ -41,11 +41,12 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect }) => {
         <div className="relative group w-full max-w-full">
             {/* Left Arrow */}
             <div
-                className={`absolute left-0 top-0 bottom-2 z-10 flex items-center justify-center w-8 bg-black transition-opacity duration-300 ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                className={`absolute left-0 top-0 bottom-2 z-10 flex items-center justify-center w-10 transition-opacity duration-300 ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             >
+                <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent pointer-events-none" />
                 <button
                     onClick={() => scroll('left')}
-                    className="p-1 hover:bg-gray-800 rounded-full text-gray-300 transition-colors"
+                    className="relative z-10 p-1.5 bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 rounded-full backdrop-blur-sm transition-all shadow-lg hover:shadow-zinc-900/50 hover:scale-110 active:scale-95"
                     aria-label="Scroll left"
                 >
                     <ChevronLeft size={16} />
@@ -62,7 +63,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect }) => {
                     <button
                         key={index}
                         onClick={() => onSelect(prompt)}
-                        className="whitespace-nowrap px-4 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-full text-xs text-gray-300 transition-all hover:scale-105 active:scale-95 snap-start shrink-0"
+                        className="whitespace-nowrap px-4 py-1.5 bg-gray-900/60 hover:bg-gray-800/80 border border-gray-800/60 hover:border-gray-700/80 rounded-full text-xs text-gray-400 hover:text-white transition-all hover:scale-105 active:scale-95 snap-start shrink-0 backdrop-blur-sm" // Made prompts slightly more transparent to blend
                     >
                         {prompt}
                     </button>
@@ -71,11 +72,12 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect }) => {
 
             {/* Right Arrow */}
             <div
-                className={`absolute right-0 top-0 bottom-2 z-10 flex items-center justify-center w-8 bg-black transition-opacity duration-300 ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                className={`absolute right-0 top-0 bottom-2 z-10 flex items-center justify-center w-10 transition-opacity duration-300 ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             >
+                <div className="absolute inset-0 bg-gradient-to-l from-black to-transparent pointer-events-none" />
                 <button
                     onClick={() => scroll('right')}
-                    className="p-1 hover:bg-gray-800 rounded-full text-gray-300 transition-colors"
+                    className="relative z-10 p-1.5 bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 rounded-full backdrop-blur-sm transition-all shadow-lg hover:shadow-zinc-900/50 hover:scale-110 active:scale-95"
                     aria-label="Scroll right"
                 >
                     <ChevronRight size={16} />
