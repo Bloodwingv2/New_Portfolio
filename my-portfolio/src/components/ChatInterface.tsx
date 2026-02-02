@@ -67,21 +67,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         }
     }, [activePrompt]);
 
-    // Initial greeting
-    useEffect(() => {
-        const initialGreeting: Message = {
-            id: "init-1",
-            role: 'agent',
-            content: (
-                <div>
-                    <p className="mb-2">Hello! I'm an AI agent representing <strong>{portfolioData.name}</strong>.</p>
-                    <p>I can help you explore Mirang's work, skills, and background. What would you like to know?</p>
-                </div>
-            )
-        };
-        setMessages([initialGreeting]);
-    }, []);
-
     // GSAP Transitions
     useGSAP(() => {
         if (hasStarted) {
