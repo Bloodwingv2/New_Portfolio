@@ -1,5 +1,4 @@
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 
 interface SplashScreenProps {
@@ -7,130 +6,97 @@ interface SplashScreenProps {
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
+    const [text, setText] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
-    const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const subTextRef = useRef<HTMLParagraphElement>(null);
-    const loaderRef = useRef<HTMLDivElement>(null);
-    const hintRef = useRef<HTMLParagraphElement>(null);
-    const overlayRef = useRef<HTMLDivElement>(null);
+    const cursorRef = useRef<HTMLDivElement>(null);
+
+    const fullText = "MGPT";
 
     useEffect(() => {
-        const tl = gsap.timeline({
-            onComplete: onComplete
-        });
+        const tl = gsap.timeline();
 
-        const letters = letterRefs.current;
+        // Initial state
+        gsap.set(subTextRef.current, { opacity: 0, y: 10 });
 
-        // Initial states
-        gsap.set(containerRef.current, { opacity: 1 });
-        gsap.set(letters, { y: 120, opacity: 0, scale: 0.8 });
-        gsap.set(subTextRef.current, { opacity: 0, y: 30 });
-        gsap.set(loaderRef.current, { scaleX: 0, transformOrigin: "left" });
-        gsap.set(hintRef.current, { opacity: 0, y: 10 });
-        gsap.set(overlayRef.current, { yPercent: 100 });
+        // Typing Logic
+        let charIndex = 0;
+        const typeInterval = setInterval(() => {
+            if (charIndex <= fullText.length) {
+                setText(fullText.slice(0, charIndex));
+                charIndex++;
+            } else {
+                clearInterval(typeInterval);
 
-        // Animation Sequence
-        tl.to(letters, {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 1.2,
-            stagger: 0.08,
-            ease: "power3.out"
-        })
-            .to(letters, {
-                color: "#ffffff", // Animate to pure white
-                duration: 0.5,
-                ease: "power2.inOut"
-            }, "-=0.8")
-            .to(subTextRef.current, {
-                opacity: 1,
-                y: 0,
-                duration: 1,
-                ease: "power2.out"
-            }, "-=0.6")
-            .to(loaderRef.current, {
-                scaleX: 1,
-                duration: 1.5,
-                ease: "expo.inOut"
-            })
-            .to(hintRef.current, {
-                opacity: 1,
-                y: 0,
-                duration: 0.5,
-                ease: "power2.out"
-            }, "-=0.5")
-            // Exit sequence
-            .to([loaderRef.current, hintRef.current], {
-                opacity: 0,
-                duration: 0.3
-            })
-            .to(loaderRef.current, {
-                scaleY: 0,
-                transformOrigin: "bottom",
-                duration: 0.3,
-                ease: "power2.in"
-            }, "<")
-            .to(containerRef.current, {
-                opacity: 0,
-                scale: 1.05,
-                duration: 0.8,
-                ease: "power2.inOut"
-            }, "-=0.2");
+                // Sequence after typing finishes
+                tl.to(subTextRef.current, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    delay: 0.2
+                })
+                    .to(containerRef.current, {
+                        opacity: 0,
+                        duration: 0.8,
+                        ease: "power2.inOut",
+                        delay: 1,
+                        onComplete: onComplete
+                    });
+            }
+        }, 150); // Typing speed per character
 
-        return () => {
-            tl.kill();
-        };
+        return () => clearInterval(typeInterval);
     }, [onComplete]);
-
-    const mainText = "MIRANG";
 
     return (
         <div
             ref={containerRef}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white isolate overflow-hidden"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white isolate overflow-hidden font-sans"
         >
-            {/* Background Gradients */}
-            <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-700/10 blur-[150px] rounded-full pointer-events-none animate-pulse" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-700/10 blur-[150px] rounded-full pointer-events-none animate-pulse" />
+            {/* Background Gradients - Removed for cleaner look */}
 
             <div className="relative z-10 flex flex-col items-center">
-                <div className="overflow-hidden flex gap-2 sm:gap-6 mb-8 px-4">
-                    {mainText.split("").map((char, index) => (
-                        <span
-                            key={index}
-                            ref={(el) => { letterRefs.current[index] = el; }}
-                            className="text-6xl sm:text-8xl md:text-9xl font-black tracking-tighter font-display text-transparent bg-clip-text bg-gradient-to-b from-gray-100 to-gray-600 inline-block"
+                <div className="flex items-center gap-4 sm:gap-6">
+                    {/* Logo */}
+                    <div className="relative flex items-center justify-center">
+                        <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20" /> {/* Reduced opacity, removed pulse */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-white relative z-10"
                         >
-                            {char}
-                        </span>
-                    ))}
+                            <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" />
+                            <path d="m4.93 10.93 1.41 1.41a2 2 0 1 1-2.83 2.83l-1.41-1.41a2 2 0 1 1 2.83-2.83Z" />
+                            <path d="m19.07 10.93-1.41 1.41a2 2 0 1 0 2.83 2.83l1.41-1.41a2 2 0 1 0-2.83-2.83Z" />
+                            <path d="M12 22a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2 2 2 0 0 1 2 2v2a2 2 0 0 1-2 2Z" />
+                            <path d="m4.93 4.93 1.41 1.41a2 2 0 1 0 2.83-2.83L7.76 2.1a2 2 0 1 0-2.83 2.83Z" />
+                            <path d="m19.07 4.93-1.41 1.41a2 2 0 1 1-2.83-2.83l1.41-1.41a2 2 0 1 1 2.83 2.83Z" />
+                        </svg>
+                    </div>
+
+                    <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold tracking-tight text-white">
+                        {text}
+                    </h1>
+                    {/* Blinking Cursor */}
+                    <div
+                        ref={cursorRef}
+                        className="w-3 h-10 sm:w-5 sm:h-16 md:w-6 md:h-20 bg-blue-500/80 ml-1 sm:ml-2 animate-pulse rounded-full"
+                    />
                 </div>
 
                 <p
                     ref={subTextRef}
-                    className="text-base sm:text-lg md:text-xl text-gray-400 tracking-[0.4em] font-light uppercase mb-16"
+                    className="text-base sm:text-lg md:text-xl text-gray-500 tracking-[0.4em] font-mono uppercase mt-8"
                 >
                     Agentic Portfolio
                 </p>
-
-                <div className="w-64 md:w-96 h-[2px] bg-gray-900 rounded-full overflow-hidden relative">
-                    <div
-                        ref={loaderRef}
-                        className="absolute inset-0 bg-white shadow-[0_0_20px_rgba(255,255,255,0.5)]"
-                    />
-                </div>
-
-                {/*<p
-                    ref={hintRef}
-                    className="mt-4 text-xs font-mono text-green-500/50 opacity-0 tracking-wider"
-                >
-                    System Initialized. Type 'help' for commands.
-                </p>*/}
             </div>
-
-            {/* Optional Overlay for different exit effect if needed, currently using opacity fade */}
-            <div ref={overlayRef} className="absolute inset-0 bg-black z-[-1]" />
         </div>
     );
 };
