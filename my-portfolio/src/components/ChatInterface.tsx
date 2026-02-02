@@ -581,7 +581,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             </button>
 
             {/* Input Area - Always visible but styled to blend */}
-            <div className="pt-4 border-t border-gray-800 bg-black z-20 pb-2">
+            <div className="pt-2 border-t border-gray-800 bg-black z-20 pb-2">
                 <ActionButtons prompts={suggestPrompts} onSelect={handleSendMessage} />
 
                 <form
