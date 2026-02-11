@@ -177,7 +177,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             normalizedInput === "who are you?" ||
             normalizedInput === "who are you"
         ) {
-            return portfolioData.bio;
+            return "{{BIO}}";
         }
 
         // 3. "Show me your projects"

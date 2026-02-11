@@ -5,6 +5,8 @@ import mlopsImg from '../assets/Mlflow.avif';
 import keysightLogo from '../assets/kt.jpg';
 import resoluteLogo from '../assets/rai.jpg';
 import githubLogo from '../assets/gh.jpg';
+import meImg from '../assets/me.jpg';
+import wassertumimg from '../assets/wassertum.jpg'
 
 // ===================================
 // Type Definitions
@@ -42,7 +44,8 @@ export const portfolioData = {
     name: "Mirang Bhandari",
     role: "Software Engineer & AI Researcher",
     location: "Mannheim, Germany",
-    profileImage: "me.jpg", // Update with actual path if needed
+    profileImage: meImg,
+    headerImage: wassertumimg,
 
     bio: `I am a software engineer who loves experimentation, building impactful software, contributing to open source and reading up on tech documentation.
   
