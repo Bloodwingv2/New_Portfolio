@@ -204,10 +204,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             normalizedInput.includes("work") ||
             normalizedInput.includes("employment")
         ) {
-            const expList = portfolioData.experience.map(exp =>
-                `**${exp.role}** at ${exp.company} (${exp.period})\n${exp.description}`
-            ).join('\n\n');
-            return `Here is my professional experience:\n\n${expList}`;
+            return "Here is my professional journey:\n\n{{EXPERIENCE}}";
         }
 
         // 6. Certifications

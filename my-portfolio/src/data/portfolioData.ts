@@ -2,6 +2,9 @@ import mindwellImg from '../assets/gemma.avif';
 import stockscreenerImg from '../assets/stockscreener.avif';
 import datasetImg from '../assets/electoral.avif';
 import mlopsImg from '../assets/Mlflow.avif';
+import keysightLogo from '../assets/kt.jpg';
+import resoluteLogo from '../assets/rai.jpg';
+import githubLogo from '../assets/gh.jpg';
 
 // ===================================
 // Type Definitions
@@ -13,6 +16,7 @@ export interface Experience {
     company: string;
     period: string;
     description: string;
+    logo?: string;
 }
 
 export interface Certification {
@@ -42,7 +46,9 @@ export const portfolioData = {
 
     bio: `I am a software engineer who loves experimentation, building impactful software, contributing to open source and reading up on tech documentation.
   
-I’m currently a Data Science & AI Grad student at SRH Heidelberg. I build data-driven and AI-powered solutions, combining Data Acquisition, Machine Learning, Backend, DevOps and Cloud Technologies to turn complex data into actionable insights for companies.`,
+I’m currently a Data Science & AI Grad student at SRH Heidelberg. I build data-driven and AI-powered solutions, combining Data Acquisition, Machine Learning, Backend, DevOps and Cloud Technologies to turn complex data into actionable insights for companies.
+
+I'm also an avid Agentic Ai Researcher who is actively building industry grade agents and trying to create meaningful research with them`,
 
     // --- Skills ---
     skills: [
@@ -59,12 +65,17 @@ I’m currently a Data Science & AI Grad student at SRH Heidelberg. I build data
         {
             title: "Web & Backend",
             icon: "globe",
-            skills: ["React", "Next.js", "Node.js", "PostgreSQL", "GraphQL", "FastAPI"]
+            skills: ["React", "PostgreSQL", "FastAPI"]
         },
         {
-            title: "Tools & Cloud",
+            title: "Cloud and DevOps",
             icon: "tool",
-            skills: ["Docker", "AWS", "Git", "Linux", "CI/CD", "MLOps"]
+            skills: ["Docker", "AWS", "Git", "Linux", "CI/CD", "Jenkins", "MLFlow"]
+        },
+        {
+            title: "Agentic AI",
+            icon: "tool",
+            skills: ["LangGraph", "LangChain", "Ollama", "n8n"]
         }
     ],
 
@@ -72,17 +83,27 @@ I’m currently a Data Science & AI Grad student at SRH Heidelberg. I build data
     experience: [
         {
             id: "exp1",
-            role: "Software Engineer",
-            company: "Tech Corp",
-            period: "2023 - Present",
-            description: "Developing scalable web applications and AI solutions."
+            role: "AI & Full Stack Engineer",
+            company: "Freelancer",
+            period: "2024 Aug - 2025 Nov",
+            description: "Growing open-source presence: 2,000+ GitHub profile views and 30+ stars across repositories.\nBuilt \"MindWell\" for the Google DeepMind Hackathon an offline-first mental wellness desktop app focused on data privacy.\nFormer LangChain contributor identified GROQ model compatibility issues.\nFormer React Native community supporter merged PRs to help developers migrate libraries to Expo and resolve integration bottlenecks.",
+            logo: githubLogo
         },
         {
             id: "exp2",
-            role: "Junior Developer",
-            company: "Startup Inc",
-            period: "2021 - 2023",
-            description: "Built full-stack applications using React and Node.js."
+            role: "DevOps Engineer",
+            company: "Keysight Technologies",
+            period: "2024 Feb - 2024 July",
+            description: "Implemented two seamless Jenkins automation pipelines using Groovy and Python that significantly reduced manual effort and improved efficiency for electronics testing. Over the course of five months, delivered five major pipeline enhancements using HTML5, CSS based technologies to create CI/CD Pipelines, while contributing more than 5,000 lines of production code across 500+ commits. In addition, Created detailed documentation to support pipeline improvements and ensure smooth knowledge transfer along United States and Penang Based DevOps Teams ensuring global collaboration",
+            logo: keysightLogo
+        },
+        {
+            id: "exp3",
+            role: "Deep Learning Intern",
+            company: "Resolute.AI",
+            period: "2023 Jan - 2023 May",
+            description: "Developed Computer Vision proof-of-concepts and worked extensively with NLP and machine learning using Python. This included building, testing, and evaluating ML/DL models to address real-world challenges. I also conducted image annotation to create custom datasets tailored for object detection tasks",
+            logo: resoluteLogo
         }
     ] as Experience[],
 

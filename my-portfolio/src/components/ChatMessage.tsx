@@ -5,6 +5,7 @@ import { Bot, User, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { portfolioData } from '../data/portfolioData';
 import ProjectCard from './ProjectCard';
 import SkillsDisplay from './SkillsDisplay';
+import ExperienceTimeline from './ExperienceTimeline';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -101,7 +102,7 @@ const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project
     // Memoize the expensive parsing logic
     const parts = useMemo(() => {
         if (!content) return [];
-        return content.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}})/g);
+        return content.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}}|{{EXPERIENCE}})/g);
     }, [content]);
 
     return (
@@ -111,6 +112,13 @@ const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project
                     return (
                         <div key={index} className="mt-6 mb-2">
                             <ProjectDeck projects={portfolioData.projects} onSelect={(p) => onProjectSelect?.(p)} />
+                        </div>
+                    );
+                }
+                if (part === '{{EXPERIENCE}}') {
+                    return (
+                        <div key={index} className="mt-6 mb-2">
+                            <ExperienceTimeline experiences={portfolioData.experience} />
                         </div>
                     );
                 }
