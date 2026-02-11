@@ -493,9 +493,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6 text-center tracking-tight">
                     Hi, I'm {portfolioData.name}
                 </h2>
-                <p className="text-gray-400 text-center max-w-lg text-base md:text-md leading-relaxed px-4">
+                <p className="text-gray-400 text-center max-w-lg text-base md:text-md leading-relaxed px-4 mb-8">
                     {portfolioData.role}. Ask me anything about my work, skills, or experience.
                 </p>
+
+                <button
+                    onClick={onStart}
+                    className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white transition-all hover:scale-105 active:scale-95 text-sm font-medium backdrop-blur-md group"
+                >
+                    <span className="relative">
+                        <span className="absolute -inset-1 rounded-full bg-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity blur-md"></span>
+                        Start Chatting
+                    </span>
+                    <Send size={16} className="text-green-400 group-hover:translate-x-1 transition-transform" />
+                </button>
             </div>
 
             {/* Messages Area - Initially Hidden via GSAP */}
