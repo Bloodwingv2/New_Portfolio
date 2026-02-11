@@ -1,7 +1,7 @@
 import React, { useRef, useMemo } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Bot, User, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { User, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { portfolioData } from '../data/portfolioData';
 import ProjectCard from './ProjectCard';
 import SkillsDisplay from './SkillsDisplay';
@@ -9,6 +9,7 @@ import ExperienceTimeline from './ExperienceTimeline';
 import BioCard from './BioCard';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import meImg from '../assets/me.jpg';
 
 interface ChatMessageProps {
     role: 'agent' | 'user';
@@ -202,7 +203,7 @@ const ChatMessage: React.FC<ChatMessageProps> = React.memo(({ role, content, onP
                 {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${role === 'agent' ? 'bg-white text-black' : 'bg-gray-800 text-gray-300'
                     }`}>
-                    {role === 'agent' ? <Bot size={18} /> : <User size={18} />}
+                    {role === 'agent' ? <img src={meImg} className='w-8 h-8 rounded-full' /> : <User size={18} />}
                 </div>
 
                 {/* Bubble */}
