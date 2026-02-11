@@ -212,10 +212,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             normalizedInput.includes("certification") ||
             normalizedInput.includes("certificate")
         ) {
-            const certList = portfolioData.certifications.map(cert =>
-                `- **${cert.name}** (${cert.issuer}, ${cert.date})`
-            ).join('\n');
-            return `I have the following certifications:\n\n${certList}`;
+            return `I have the following certifications:\n\n{{CERTIFICATIONS}}`;
         }
 
         // 7. Hobbies & Interests

@@ -22,10 +22,13 @@ export interface Experience {
 }
 
 export interface Certification {
+    id: string;
     name: string;
     issuer: string;
     date: string;
     link?: string;
+    description: string;
+    icon: string;
 }
 
 export interface Interest {
@@ -113,14 +116,22 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
     // --- Certifications ---
     certifications: [
         {
+            id: "cert1",
             name: "AWS Certified Solutions Architect",
             issuer: "Amazon Web Services",
-            date: "2024"
+            date: "2024",
+            description: "Validated expertise in designing distributed systems on AWS, covering security, reliability, and scalability best practices.",
+            link: "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+            icon: "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
         },
         {
+            id: "cert2",
             name: "TensorFlow Developer Certificate",
             issuer: "Google",
-            date: "2023"
+            date: "2023",
+            description: "Demonstrated proficiency in building and training neural networks using TensorFlow, including CNNs, RNNs, and NLP models.",
+            link: "https://www.credential.net/",
+            icon: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Tensorflow_logo.svg"
         }
     ] as Certification[],
 

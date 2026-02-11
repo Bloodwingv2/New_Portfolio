@@ -7,6 +7,7 @@ import ProjectCard from './ProjectCard';
 import SkillsDisplay from './SkillsDisplay';
 import ExperienceTimeline from './ExperienceTimeline';
 import BioCard from './BioCard';
+import CertificationDisplay from './CertificationDisplay';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import meImg from '../assets/me.jpg';
@@ -104,7 +105,7 @@ const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project
     // Memoize the expensive parsing logic
     const parts = useMemo(() => {
         if (!content) return [];
-        return content.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}}|{{EXPERIENCE}}|{{BIO}})/g);
+        return content.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}}|{{EXPERIENCE}}|{{BIO}}|{{CERTIFICATIONS}})/g);
     }, [content]);
 
     return (
@@ -131,10 +132,18 @@ const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project
                         </div>
                     );
                 }
+
                 if (part === '{{SKILLS}}') {
                     return (
                         <div key={index} className="mt-4 not-prose">
                             <SkillsDisplay skills={portfolioData.skills} />
+                        </div>
+                    );
+                }
+                if (part === '{{CERTIFICATIONS}}') {
+                    return (
+                        <div key={index} className="mt-4 not-prose">
+                            <CertificationDisplay certifications={portfolioData.certifications} />
                         </div>
                     );
                 }
