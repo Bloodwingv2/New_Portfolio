@@ -117,22 +117,32 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
     certifications: [
         {
             id: "cert1",
-            name: "AWS Certified Solutions Architect",
+            name: "AWS Academy Graduate - Cloud Foundations",
             issuer: "Amazon Web Services",
-            date: "2024",
+            date: "2025",
             description: "Validated expertise in designing distributed systems on AWS, covering security, reliability, and scalability best practices.",
-            link: "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+            link: "https://www.credly.com/badges/e0596dc5-f400-4a99-a3c0-5bc7caca80dd/print",
             icon: "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
         },
         {
             id: "cert2",
-            name: "TensorFlow Developer Certificate",
-            issuer: "Google",
-            date: "2023",
-            description: "Demonstrated proficiency in building and training neural networks using TensorFlow, including CNNs, RNNs, and NLP models.",
-            link: "https://www.credential.net/",
-            icon: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Tensorflow_logo.svg"
-        }
+            name: "Ambient Agents with LangGraph",
+            issuer: "Langchain",
+            date: "2025",
+            description: "Learnt the fundamentals of LangGraph to build agents which perform tool calls and use memory states to recall previous information in the conversation.",
+            link: "https://academy.langchain.com/certificates/ewtjjlyf1x",
+            icon: "https://upload.wikimedia.org/wikipedia/commons/6/60/LangChain_Logo.svg"
+        },
+        {
+            id: "cert3",
+            name: "Disaster Risk Monitoring Using Satellite Imagery",
+            issuer: "Nvidia",
+            date: "2024",
+            description: "A course from NVIDIA that teaches how to use AI and satellite imagery to detect and monitor natural disasters (like floods) using deep learning and GPU tools",
+            link: "https://drive.google.com/file/d/168UiXJPDRzTOTAJLvu8NbMfU0CFc0QxI/view",
+            icon: "https://upload.wikimedia.org/wikipedia/commons/a/a4/NVIDIA_logo.svg"
+        },
+
     ] as Certification[],
 
     // --- Projects ---
