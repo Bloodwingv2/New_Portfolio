@@ -117,21 +117,21 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
     certifications: [
         {
             id: "cert1",
+            name: "Deep Agents with LangChain and LangGraph",
+            issuer: "Langchain",
+            date: "2026",
+            description: "Learnt the fundamentals of LangGraph and Langchain to build Deep Agents which perform tool calls to specialized agents while using memory states to recall previous information in the conversation to attain maximum efficiency.",
+            link: "https://academy.langchain.com/certificates/og6z4gygcc",
+            icon: "https://upload.wikimedia.org/wikipedia/commons/6/60/LangChain_Logo.svg"
+        },
+        {
+            id: "cert2",
             name: "AWS Academy Graduate - Cloud Foundations",
             issuer: "Amazon Web Services",
             date: "2025",
             description: "Validated expertise in designing distributed systems on AWS, covering security, reliability, and scalability best practices.",
             link: "https://www.credly.com/badges/e0596dc5-f400-4a99-a3c0-5bc7caca80dd/print",
             icon: "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
-        },
-        {
-            id: "cert2",
-            name: "Ambient Agents with LangGraph",
-            issuer: "Langchain",
-            date: "2025",
-            description: "Learnt the fundamentals of LangGraph to build agents which perform tool calls and use memory states to recall previous information in the conversation.",
-            link: "https://academy.langchain.com/certificates/ewtjjlyf1x",
-            icon: "https://upload.wikimedia.org/wikipedia/commons/6/60/LangChain_Logo.svg"
         },
         {
             id: "cert3",
