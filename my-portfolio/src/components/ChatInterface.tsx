@@ -221,9 +221,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             normalizedInput.includes("hobby") ||
             normalizedInput.includes("interest")
         ) {
-            const hobbies = portfolioData.hobbies.join(', ');
-            const interests = portfolioData.interests.map(i => `**${i.title}**: ${i.description}`).join('\n- ');
-            return `**Hobbies**: ${hobbies}\n\n**Interests**:\n- ${interests}`;
+            return `Here's a bit about what I do outside of work:\n\n{{HOBBIES}}`;
         }
 
         // 8. Contact / Socials
@@ -361,6 +359,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             - If the user asks about projects/work: Output the text intro, then "{{PROJECTS}}" at the end.
             - If the user asks about skills/stack/technologies: Output the text intro, then "{{SKILLS}}" at the end.
             - If the user asks for a resume/CV: Output a polite message, then "{{RESUME}}".
+            - If the user asks about hobbies or interests: Output the text intro, then "{{HOBBIES}}" at the end.
             - If the user prompts "Surprise me" or asks for fun facts: Share a fun fact from the data.
 
             4. Keep responses concise. Use markdown for formatting.

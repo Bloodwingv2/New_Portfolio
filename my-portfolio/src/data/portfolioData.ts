@@ -7,6 +7,9 @@ import resoluteLogo from '../assets/rai.jpg';
 import githubLogo from '../assets/gh.jpg';
 import meImg from '../assets/me.jpg';
 import wassertumimg from '../assets/wassertum.jpg'
+import travelimg from '../assets/travel.jpg'
+import overwatchimg from '../assets/overwatch.png'
+import githubimg from '../assets/githubbg.png'
 
 // ===================================
 // Type Definitions
@@ -207,25 +210,28 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
 
     // --- Other Interests ---
     hobbies: [
-        "Photography",
-        "Hiking",
-        "Reading Sci-Fi",
-        "Gaming"
-    ],
-
-    interests: [
         {
-            title: "Generative AI",
-            description: "Exploring LLMs and image generation models.",
-            icon: "brain"
+            title: "Travelling",
+            description: "Exploring new places and cultures!",
+            icon: "camera",
+            color: "#ec4899",
+            bgImage: travelimg
         },
         {
-            title: "Open Source",
-            description: "Contributing to community-driven projects.",
-            icon: "github"
+            title: "Gaming",
+            description: "Exploring new stories, worlds or playing competitively!",
+            icon: "gamepad",
+            color: "#22c55e",
+            bgImage: overwatchimg
+        },
+        {
+            title: "OSS",
+            description: "Contributing to community-driven projects!",
+            icon: "github",
+            color: "#22c55e",
+            bgImage: githubimg
         }
-    ] as Interest[],
-
+    ],
     // --- Resume & Fun Facts ---
     resumeUrl: "/resume.pdf",
 

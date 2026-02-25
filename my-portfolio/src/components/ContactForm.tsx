@@ -75,9 +75,9 @@ const ContactForm: React.FC = () => {
         <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-5 shadow-xl w-full max-w-md">
             <h3 className="text-white font-bold text-lg mb-1 flex items-center gap-2">
                 <Send size={16} className="text-blue-400" />
-                Initialize Uplink
+                Contact Me!
             </h3>
-            <p className="text-gray-400 text-xs mb-4">Secure channel established. Ready for transmission.</p>
+            <p className="text-gray-400 text-xs mb-4">Just enter your details below! and i will recieve an e-mail.</p>
 
             <form ref={form} onSubmit={sendEmail} className="space-y-3">
                 {/* Honeypot Field - Hidden */}
@@ -96,7 +96,7 @@ const ContactForm: React.FC = () => {
                     <input
                         type="text"
                         name="user_name"
-                        placeholder="Operator Name"
+                        placeholder="Your Name"
                         value={formData.user_name}
                         onChange={handleChange}
                         className="w-full bg-[#0a0a0a] border border-gray-800 rounded-md px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none transition-colors"
@@ -108,7 +108,7 @@ const ContactForm: React.FC = () => {
                     <input
                         type="email"
                         name="user_email"
-                        placeholder="Comms Frequency (Email)"
+                        placeholder="Your Email"
                         value={formData.user_email}
                         onChange={handleChange}
                         className="w-full bg-[#0a0a0a] border border-gray-800 rounded-md px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none transition-colors"
@@ -119,7 +119,7 @@ const ContactForm: React.FC = () => {
                 <div>
                     <textarea
                         name="message"
-                        placeholder="Transmission Content..."
+                        placeholder="Your Message"
                         rows={4}
                         value={formData.message}
                         onChange={handleChange}
