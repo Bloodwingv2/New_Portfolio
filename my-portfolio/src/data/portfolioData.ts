@@ -10,6 +10,7 @@ import wassertumimg from '../assets/wassertum.jpg'
 import travelimg from '../assets/travel.jpg'
 import overwatchimg from '../assets/overwatch.png'
 import githubimg from '../assets/githubbg.png'
+import atsimg from '../assets/atsimg.png'
 
 // ===================================
 // Type Definitions
@@ -151,12 +152,22 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
     // --- Projects ---
     projects: [
         {
+            id: "ats",
+            title: "ATS",
+            category: "Applicant Tracking System",
+            description: "An end-end automated Applicant Tracking System that sources candidates across GitHub, LeetCode, and StackOverflow using Legal API's. Uses Machine Learning algorithms for selection and features a live coding portal. Showcases proficiency in ETL data pipelines, ML, Full-stack (FastAPI/Streamlit), and DevOps (GitHub Actions)",
+            link: "https://github.com/Bloodwingv2/ATS",
+            image: atsimg,
+            techStack: ["FastAPI", "Pandas", "Python", "Streamlit", "Scikit-learn", "Machine Learning", "GitHub CI/CD Actions", "Data Science"]
+        },
+        {
             id: "mindwell",
             title: "Mindwell",
             category: "Offline AI Application",
             description: "An offline AI application focused on mental wellness and privacy-first interactions.",
             link: "https://mirang.framer.ai/projects/mindwell",
-            image: mindwellImg
+            image: mindwellImg,
+            techStack: ["Electron", "React", "TypeScript", "TailwindCSS", "Ollama", "NSIS", "Gemma3n"]
         },
         {
             id: "stockscreener",
@@ -164,7 +175,8 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
             category: "Local StockAnalyser AI Agent",
             description: "A local AI agent designed to analyze stock market trends and provide screening data.",
             link: "https://mirang.framer.ai/projects/stockscreener",
-            image: stockscreenerImg
+            image: stockscreenerImg,
+            techStack: ["Python", "Pandas", "YahooAPI", "Agentic AI", "Rich Text", "CLI"]
         },
         {
             id: "dataset",
@@ -172,7 +184,8 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
             category: "Custom Dataset",
             description: "A comprehensive custom dataset curated for electoral analysis and data science projects.",
             link: "https://mirang.framer.ai/projects/dataset",
-            image: datasetImg
+            image: datasetImg,
+            techStack: ["Python", "Data Engineering", "Web Scraping", "Data Cleaning", "SQL"]
         },
         {
             id: "mlops",
@@ -180,7 +193,8 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
             category: "MLOPS Simulation",
             description: "A complete simulation of an MLOps pipeline demonstrating CI/CD for machine learning models.",
             link: "https://mirang.framer.ai/projects/mlops",
-            image: mlopsImg
+            image: mlopsImg,
+            techStack: ["MLflow", "Docker", "PostgreSQL", "Machine Learning", "GitHub CI/CD Actions"]
         }
     ],
 

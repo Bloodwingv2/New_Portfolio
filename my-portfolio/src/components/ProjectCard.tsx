@@ -9,6 +9,7 @@ interface Project {
     description: string;
     link: string;
     image?: string;
+    techStack?: string[];
 }
 
 interface ProjectCardProps {

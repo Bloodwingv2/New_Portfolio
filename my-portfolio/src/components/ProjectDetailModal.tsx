@@ -10,6 +10,7 @@ interface Project {
     description: string;
     link: string;
     image?: string;
+    techStack?: string[];
 }
 
 interface ProjectDetailModalProps {
@@ -151,14 +152,16 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project, onClos
                                     {project.description}
                                 </p>
 
-                                {/* Simulated Tags - In a real app these would be prop data */}
-                                <div className="flex flex-wrap gap-2 mb-8">
-                                    {['React', 'TypeScript', 'Tailwind', 'GSAP'].map((tag, i) => (
-                                        <span key={i} className="px-3 py-1 bg-gray-900 border border-gray-800 rounded-md text-xs text-gray-400 font-mono">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
+                                {/* Dynamic Tech Stack Tags */}
+                                {project.techStack && project.techStack.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-8">
+                                        {project.techStack.map((tag, i) => (
+                                            <span key={i} className="px-3 py-1 bg-gray-900 border border-gray-800 rounded-md text-xs text-gray-400 font-mono">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Action Bar */}
