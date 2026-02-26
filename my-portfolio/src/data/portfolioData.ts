@@ -7,7 +7,7 @@ import resoluteLogo from '../assets/rai.jpg';
 import githubLogo from '../assets/gh.jpg';
 import meImg from '../assets/me.jpg';
 import wassertumimg from '../assets/wassertum.jpg'
-import travelimg from '../assets/travel.jpg'
+import travelimg from '../assets/travel.avif'
 import overwatchimg from '../assets/overwatch.png'
 import githubimg from '../assets/githubbg.png'
 import atsimg from '../assets/atsimg.png'
