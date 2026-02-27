@@ -12,6 +12,7 @@ import InteractiveHobbies from './InteractiveHobbies';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import meImg from '../assets/me.jpg';
+import GithubWidget from './GithubWidget';
 
 interface ChatMessageProps {
     role: 'agent' | 'user' | 'tool';
@@ -106,7 +107,7 @@ const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project
     // Memoize the expensive parsing logic
     const parts = useMemo(() => {
         if (!content) return [];
-        return content.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}}|{{EXPERIENCE}}|{{BIO}}|{{CERTIFICATIONS}}|{{HOBBIES}})/g);
+        return content.split(/({{PROJECTS}}|{{SKILLS}}|{{RESUME}}|{{EXPERIENCE}}|{{BIO}}|{{CERTIFICATIONS}}|{{HOBBIES}}|{{GITHUB}})/g);
     }, [content]);
 
     return (
@@ -152,6 +153,13 @@ const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project
                     return (
                         <div key={index} className="w-full">
                             <InteractiveHobbies hobbies={portfolioData.hobbies as any} />
+                        </div>
+                    );
+                }
+                if (part === '{{GITHUB}}') {
+                    return (
+                        <div key={index} className="w-full mt-4">
+                            <GithubWidget />
                         </div>
                     );
                 }

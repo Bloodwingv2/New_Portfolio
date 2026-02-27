@@ -39,7 +39,7 @@ export const fetchGithubActivity = async (username: string = 'Bloodwingv2'): Pro
         const userData = await userResponse.json();
 
         // 2. Fetch public events for recent activity
-        const eventsResponse = await fetch(`https://api.github.com/users/${username}/events/public?per_page=15`);
+        const eventsResponse = await fetch(`https://api.github.com/users/${username}/events/public?per_page=40`);
         if (!eventsResponse.ok) throw new Error(`GitHub API (Events) returned status: ${eventsResponse.status}`);
         const events = await eventsResponse.json();
 
@@ -53,37 +53,34 @@ export const fetchGithubActivity = async (username: string = 'Bloodwingv2'): Pro
             return false;
         });
 
-        let recentActivity = [];
-        if (relevantEvents.length > 0) {
-            recentActivity = relevantEvents.slice(0, 5).map((event: any) => {
-                const repoName = event.repo.name;
-                const date = new Date(event.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        // Group relevant events by repository to give the LLM a broader, summarized context
+        const repoActivity: Record<string, { pushes: number, prs: number, latestCommits: string[] }> = {};
 
-                if (event.type === 'PushEvent') {
-                    const commits = event.payload.commits || [];
-                    const commitsCount = commits.length;
-                    const branch = event.payload.ref ? event.payload.ref.replace('refs/heads/', '') : 'unknown';
+        relevantEvents.slice(0, 25).forEach((event: any) => {
+            const repoName = event.repo.name;
+            if (!repoActivity[repoName]) {
+                repoActivity[repoName] = { pushes: 0, prs: 0, latestCommits: [] };
+            }
 
-                    // Get up to 2 recent commit messages for context
-                    const commitMessages = commits.length > 0
-                        ? commits.slice(0, 2).map((c: any) => `- "${c.message.split('\n')[0]}"`).join(' | ')
-                        : "No specific commit messages available";
-
-                    return `[${date}] Pushed ${commitsCount} commit(s) to branch '${branch}' in ${repoName}. Details: ${commitMessages}`;
-
-                } else if (event.type === 'CreateEvent') {
-                    const refType = event.payload.ref_type;
-                    return `[${date}] Created a new ${refType} in ${repoName}.`;
-
-                } else if (event.type === 'PullRequestEvent') {
-                    const action = event.payload.action;
-                    const prTitle = event.payload.pull_request.title;
-                    return `[${date}] ${action} a Pull Request in ${repoName}: "${prTitle}"`;
+            if (event.type === 'PushEvent') {
+                repoActivity[repoName].pushes += 1;
+                const commits = event.payload?.commits || [];
+                if (commits.length > 0 && repoActivity[repoName].latestCommits.length < 3) {
+                    repoActivity[repoName].latestCommits.push(`"${commits[0].message.split('\n')[0]}"`);
                 }
+            } else if (event.type === 'PullRequestEvent') {
+                repoActivity[repoName].prs += 1;
+            }
+        });
 
-                return `[${date}] Activity in ${repoName}.`;
-            });
-        }
+        // Format the grouped data into concise strings for the LLM
+        const recentActivity = Object.entries(repoActivity).map(([repo, data]) => {
+            const activitySummary = `Activity in ${repo}: ${data.pushes} pushes, ${data.prs} PRs. `;
+            const commitSummary = data.latestCommits.length > 0
+                ? `Recent work includes: ${data.latestCommits.join(', ')}.`
+                : "";
+            return activitySummary + commitSummary;
+        });
 
         // Return a highly detailed JSON string for the LLM to read and summarize
         return JSON.stringify({
