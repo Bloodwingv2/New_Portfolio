@@ -50,19 +50,24 @@ export const fetchGithubActivity = async (username: string = 'Bloodwingv2'): Pro
     }
 
     try {
+        const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+        const headers: Record<string, string> = {};
+        if (githubToken) {
+            headers['Authorization'] = `Bearer ${githubToken}`;
+        }
+
         // We no longer need the User API call for stats, as the Widget handles that UI independently
         // 2. Fetch public events for recent activity
-        const eventsResponse = await fetch(`https://api.github.com/users/${username}/events/public?per_page=40`);
+        const eventsResponse = await fetch(`https://api.github.com/users/${username}/events/public?per_page=40`, {
+            headers
+        });
+
         if (!eventsResponse.ok) throw new Error(`GitHub API (Events) returned status: ${eventsResponse.status}`);
         const events = await eventsResponse.json();
 
-        // 3. Filter and parse relevant activity (exclude empty pushes)
+        // 3. Filter and parse relevant activity
         const relevantEvents = events.filter((event: any) => {
-            if (event.type === 'CreateEvent' || event.type === 'PullRequestEvent') return true;
-            if (event.type === 'PushEvent') {
-                const commits = event.payload?.commits || [];
-                return commits.length > 0; // Only keep pushes that actually have commits
-            }
+            if (event.type === 'CreateEvent' || event.type === 'PullRequestEvent' || event.type === 'PushEvent') return true;
             return false;
         });
 

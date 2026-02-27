@@ -18,7 +18,13 @@ const GithubWidget: React.FC = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch(`https://api.github.com/users/${username}`);
+                const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+                const headers: Record<string, string> = {};
+                if (githubToken) {
+                    headers['Authorization'] = `Bearer ${githubToken}`;
+                }
+
+                const response = await fetch(`https://api.github.com/users/${username}`, { headers });
                 if (response.ok) {
                     const data = await response.json();
                     setStats(data);

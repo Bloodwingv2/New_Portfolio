@@ -361,8 +361,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
             if (githubResponseCache.content && (Date.now() - githubResponseCache.timestamp < CACHE_TTL)) {
                 console.log("Serving full LLM text from GitHub Cache to save Groq tokens");
-                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'agent', content: githubResponseCache.content }]);
-                setIsTyping(false);
+
+                // Fake the tool execution UI and latency for realism
+                setIsTyping(true); // Shows the generic thinking UI
+                setIsFetchingTool(true); // Shows the specific "Calling function: fetch_github_activity" sub-status
+
+                // Simulate network latency for the "API call"
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                setIsFetchingTool(false);
+
+                // Stream the cached response character-by-character as if the LLM is typing it
+                await streamLocalResponse(githubResponseCache.content);
                 return;
             }
         }
