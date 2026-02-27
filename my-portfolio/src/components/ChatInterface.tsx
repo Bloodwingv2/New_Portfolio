@@ -28,6 +28,10 @@ interface ChatInterfaceProps {
     onPromptHandled: () => void;
 }
 
+// Global cache to prevent Groq API rate limits when asking for GitHub activity.
+// Hoisted OUTSIDE the component to survive React renders.
+let githubResponseCache = { timestamp: 0, content: "" };
+
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, activePrompt, onPromptHandled }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState("");
@@ -350,7 +354,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             }
         }
 
-        // 2. Fallback to LLM API
+        // 2. High-Level Caching for GitHub Tool
+        // If the user is specifically asking for GitHub activity, check our global text cache first
+        const lowerInput = input.toLowerCase();
+        if (lowerInput.includes("github") || lowerInput.includes("recent github activity")) {
+            const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+            if (githubResponseCache.content && (Date.now() - githubResponseCache.timestamp < CACHE_TTL)) {
+                console.log("Serving full LLM text from GitHub Cache to save Groq tokens");
+                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'agent', content: githubResponseCache.content }]);
+                setIsTyping(false);
+                return;
+            }
+        }
+
+        // 3. Fallback to LLM API
         const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
         if (!apiKey) {
@@ -394,13 +411,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             - Use bullet points for lists of skills or steps.
             - Keep responses concise but conversational.
             AGENTIC TOOL INSTRUCTIONS:
-            - If you call a tool (like \`fetch_github_activity\`) and receive a JSON response, YOU MUST explicitly cite the data inside that JSON but DO NOT just dump a robotic list.
-            - Summarize the activity naturally like a human. Weave the data into a cohesive story about my overall focus this week.
-            - CRITICAL: Do NOT invent, hallucinate, or guess repository names, projects, or commit messages. You must ONLY mention repositories and commits that are explicitly listed in the JSON response payload.
-            - Group work by repository. If I worked on multiple repos, mention them organically based strictly on the data provided.
-            - Highlight my total repository count or follower stats as brief conversational flexes.
-            - Use bullet points ONLY if you are highlighting 2-3 major distinct areas of focus, otherwise write fluid paragraphs.
-            - Use bullet points ONLY if you are highlighting 2-3 major distinct areas of focus, otherwise write fluid paragraphs.
+            - If you call a tool (like \`fetch_github_activity\`) and receive a JSON response, YOU MUST ONLY cite the exact data inside that JSON API response.
+            - CRITICAL: Do NOT add ANY information, filler, conversational tangents, or outside assumptions other than what is directly present in the tool call's returned JSON.
+            - The JSON contains an array of repositories. Each has \`activity\` (e.g., "Pushed 2 time(s)", "Opened 1 PR(s)") and \`recent_commits\`.
+            - CRITICAL: Only mention the exact actions listed in the \`activity\` array. Do NOT add conversational filler like "and opened a few pull requests" if "Opened PR(s)" is not explicitly listed for that repository.
+            - Provide a fluid, concise summary of these exact data points.
+            - CRITICAL HALLUCINATION PREVENTION: Under NO circumstances should you mention 'ATS', 'Mindwell', 'StockScreener' or any other project from my core background data UNLESS they explicitly appear inside the JSON payload.
+            - If the JSON says "No recent public coding activity found", simply apologize and state exactly that. Do not pivot to other subjects.
+            - Use bullet points ONLY if you are highlighting 2-3 distinct repositories, otherwise write fluid paragraphs.
             - CRITICAL: Whenever you use \`fetch_github_activity\`, you must ALWAYS append exactly "\n\n{{GITHUB}}" at the very end of your final response.`;
 
             // ==========================================
@@ -469,17 +487,25 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             let toolCallArgs = "";
             let toolCallId = "";
 
+            let buffer = "";
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
+                buffer += decoder.decode(value, { stream: true });
+
+                // Process only complete lines split by double newline (SSE standard)
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || ""; // Keep the last incomplete fragment in the buffer
 
                 for (const line of lines) {
-                    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                    if (line.trim().startsWith('data: ') && line.trim() !== 'data: [DONE]') {
                         try {
-                            const data = JSON.parse(line.slice(6));
+                            const dataStr = line.replace(/^data:\s*/, '').trim();
+                            if (!dataStr) continue;
+
+                            const data = JSON.parse(dataStr);
 
                             // Check if LLM decided to use a tool
                             const deltaTools = data.choices?.[0]?.delta?.tool_calls;
@@ -507,7 +533,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                                 }
                             }
                         } catch (e) {
-                            console.error("Error parsing stream chunk", e);
+                            console.error("Error parsing stream chunk, skipped:", e, "Raw string:", line);
                         }
                     }
                 }
@@ -555,6 +581,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     ? { ...msg, content: fullContent, isStreaming: false }
                     : msg
             ));
+
+            // If this was a GitHub summary, save the final generated output to the global cache
+            if (fullContent.includes('{{GITHUB}}')) {
+                githubResponseCache = {
+                    timestamp: Date.now(),
+                    content: fullContent
+                };
+                console.log("Saved full LLM response to GitHub Cache.");
+            }
 
         } catch (error: any) {
             if (error.name === 'AbortError') return;
