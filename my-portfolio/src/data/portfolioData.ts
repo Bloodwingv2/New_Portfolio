@@ -262,6 +262,7 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
 
 export const suggestPrompts = [
     "Tell me about yourself",
+    "Recent GitHub Activity",
     "Show me your projects",
     "What are your skills?",
     "Work Experience",

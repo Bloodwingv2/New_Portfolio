@@ -14,7 +14,7 @@ import remarkGfm from 'remark-gfm';
 import meImg from '../assets/me.jpg';
 
 interface ChatMessageProps {
-    role: 'agent' | 'user';
+    role: 'agent' | 'user' | 'tool';
     content: string | React.ReactNode;
     timestamp?: string;
     onProjectSelect?: (project: any) => void;

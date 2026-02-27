@@ -9,14 +9,16 @@ import Sidebar from './Sidebar';
 import ProjectDetailModal from './ProjectDetailModal';
 import ContactForm from './ContactForm';
 import { portfolioData, suggestPrompts } from '../data/portfolioData';
-import { Send, Terminal, Menu, ChevronLeft } from 'lucide-react';
-
+import { Send, Terminal, Menu, ChevronLeft, Activity } from 'lucide-react';
+import { githubActivityToolDefinition, fetchGithubActivity } from './githubAgent';
 
 type Message = {
     id: string;
-    role: 'agent' | 'user';
+    role: 'agent' | 'user' | 'tool';
     content: React.ReactNode;
     isStreaming?: boolean;
+    name?: string; // For tool responses
+    tool_calls?: any[]; // To track when the LLM decides to use a tool
 };
 
 interface ChatInterfaceProps {
@@ -33,6 +35,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
     const [showMatrix, setShowMatrix] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<any>(null);
+    const [isFetchingTool, setIsFetchingTool] = useState(false); // New state for tool execution UI
 
     // Refs for animations
     const containerRef = useRef<HTMLDivElement>(null);
@@ -144,7 +147,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         setInputValue("");
         setIsTyping(true);
 
-        generateResponseStream(text);
+        const currentMessages = [...messages, userMsg]; // Capture immediate state
+        generateResponseStream(text, currentMessages);
     };
 
     const processCommand = (input: string): boolean => {
@@ -242,6 +246,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return `You can reach me via:\n\n${socials}`;
         }
 
+        // --- NEW: Block simple inquiries from being caught here so the LLM gets them ---
+        if (
+            normalizedInput.includes("github") ||
+            normalizedInput.includes("working on") ||
+            normalizedInput.includes("coding right now") ||
+            normalizedInput.includes("repos")
+        ) {
+            // Let the LLM handle this so it can trigger the tool call
+            return null;
+        }
+
         // 9. "Do you have a resume?"
         if (
             normalizedInput.includes("resume") ||
@@ -306,26 +321,33 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         abortControllerRef.current = null;
     };
 
-    const generateResponseStream = async (input: string) => {
-        // 1. Check for local predefined response
-        const localResponse = getPredefinedResponse(input);
-        if (localResponse) {
-            if (localResponse === "{{CONTACT_FORM}}") {
-                setIsTyping(true);
-                // Simulate "initializing secure channel"
-                await new Promise(resolve => setTimeout(resolve, 1500));
+    /**
+     * Executes a Groq API request. It handles standard streams and captures tool calls.
+     * Uses `currentMessages` to include full conversation history (e.g. tool results).
+     */
+    const generateResponseStream = async (input: string, currentMessages: Message[] = messages) => {
+        // 1. Check for local predefined response (only on initial user input, not tool chains)
+        // If the last message was a tool, this is the LLM finalizing the answer, so skip static checks.
+        const isToolFollowUp = currentMessages.length > 0 && currentMessages[currentMessages.length - 1].role === 'tool';
 
-                const msgId = (Date.now() + 1).toString();
-                setMessages(prev => [...prev, {
-                    id: msgId,
-                    role: 'agent',
-                    content: <ContactForm />
-                }]);
-                setIsTyping(false);
+        if (!isToolFollowUp) {
+            const localResponse = getPredefinedResponse(input);
+            if (localResponse) {
+                if (localResponse === "{{CONTACT_FORM}}") {
+                    setIsTyping(true);
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    const msgId = (Date.now() + 1).toString();
+                    setMessages(prev => [...prev, {
+                        id: msgId,
+                        role: 'agent',
+                        content: <ContactForm />
+                    }]);
+                    setIsTyping(false);
+                    return;
+                }
+                await streamLocalResponse(localResponse);
                 return;
             }
-            await streamLocalResponse(localResponse);
-            return;
         }
 
         // 2. Fallback to LLM API
@@ -347,11 +369,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         // Artificial delay for "processing" feel
         await new Promise(resolve => setTimeout(resolve, 1200));
 
+        let isToolCall = false;
+
         try {
             const systemPrompt = `You are an interactive AI portfolio assistant for Mirang Bhandari.
             
             CORE INSTRUCTIONS:
-            1. Answer questions based on this data: ${JSON.stringify(portfolioData)}.
+            1. Answer questions based on this core data: Mirang Bhandari is a Software Engineer & AI Researcher based in Mannheim, Germany. He specializes in AI, Backend, and Agentic workflows. He has worked at Keysight Technologies (DevOps) and Resolute.AI (Deep Learning). His projects include 'ATS' (a hiring platform), 'Mindwell' (offline mental wellness AI), and 'StockScreener'. He is AWS and LangChain certified.
             2. Be professional but personable. Answer in the first person ("I started coding when...").
             3. CRITICAL: When relevant, use the following TAGS to display rich widgets. Do not describe the widget, just output the tag on a new line.
             
@@ -370,6 +394,28 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             - Use bullet points for lists of skills or steps.
             - Keep responses concise but conversational.`;
 
+            // ==========================================
+            // AGENTIC BEHAVIOR: Build Messages for API
+            // ==========================================
+            // Safely limit history. We keep the most recent messages, but ensure we don't sever a tool_call / tool response pair.
+            const slicedMessages = currentMessages.length > 8 ? currentMessages.slice(-8) : currentMessages;
+
+            const apiMessages = [
+                { role: "system", content: systemPrompt },
+                ...slicedMessages.map(m => {
+                    if (m.role === 'tool') {
+                        return { role: "tool", content: m.content as string, tool_call_id: m.id, name: m.name };
+                    }
+                    if (m.tool_calls) {
+                        return { role: "assistant", content: null, tool_calls: m.tool_calls };
+                    }
+                    return {
+                        role: m.role === 'agent' ? 'assistant' : 'user',
+                        content: typeof m.content === 'string' ? m.content : "Displaying rich content."
+                    };
+                })
+            ];
+
             const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: {
@@ -377,15 +423,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     "Authorization": `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: "llama-3.3-70b-versatile",
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        ...messages.map(m => ({
-                            role: m.role === 'agent' ? 'assistant' : 'user',
-                            content: typeof m.content === 'string' ? m.content : "Displaying rich content."
-                        })),
-                        { role: "user", content: input }
-                    ],
+                    model: "llama-3.1-8b-instant",
+                    messages: apiMessages,
+                    tools: [githubActivityToolDefinition], // <--- PASS TOOLS HERE
+                    tool_choice: "auto",
                     stream: true,
                     temperature: 0.7,
                     max_tokens: 1000
@@ -415,6 +456,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             let lastUpdateTime = 0;
             const THROTTLE_MS = 50;
 
+            let toolCallName = "";
+            let toolCallArgs = "";
+            let toolCallId = "";
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
@@ -426,17 +471,31 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     if (line.startsWith('data: ') && line !== 'data: [DONE]') {
                         try {
                             const data = JSON.parse(line.slice(6));
-                            const content = data.choices[0]?.delta?.content || "";
-                            fullContent += content;
 
-                            const now = Date.now();
-                            if (now - lastUpdateTime > THROTTLE_MS) {
-                                setMessages(prev => prev.map(msg =>
-                                    msg.id === msgId
-                                        ? { ...msg, content: fullContent }
-                                        : msg
-                                ));
-                                lastUpdateTime = now;
+                            // Check if LLM decided to use a tool
+                            const deltaTools = data.choices?.[0]?.delta?.tool_calls;
+                            if (deltaTools && deltaTools.length > 0) {
+                                isToolCall = true;
+                                if (deltaTools[0].function?.name) toolCallName = deltaTools[0].function.name;
+                                if (deltaTools[0].function?.arguments) toolCallArgs += deltaTools[0].function.arguments;
+                                if (deltaTools[0].id) toolCallId = deltaTools[0].id;
+                                continue;
+                            }
+
+                            // Standard text content
+                            const content = data.choices?.[0]?.delta?.content || "";
+                            if (content) {
+                                fullContent += content;
+
+                                const now = Date.now();
+                                if (now - lastUpdateTime > THROTTLE_MS) {
+                                    setMessages(prev => prev.map(msg =>
+                                        msg.id === msgId
+                                            ? { ...msg, content: fullContent }
+                                            : msg
+                                    ));
+                                    lastUpdateTime = now;
+                                }
                             }
                         } catch (e) {
                             console.error("Error parsing stream chunk", e);
@@ -445,7 +504,43 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 }
             }
 
-            // Ensure final content is set
+            // ==========================================
+            // AGENTIC BEHAVIOR: Execute Tool Chain
+            // ==========================================
+            if (isToolCall) {
+                // Remove the empty streaming message placeholder
+                setMessages(prev => prev.filter(msg => msg.id !== msgId));
+                setIsFetchingTool(true); // Trigger UI indicator
+
+                // 1. Add Assistant Tool Call request to history
+                const toolRequestMessage: any = { role: "assistant", tool_calls: [{ id: toolCallId, function: { name: toolCallName, arguments: toolCallArgs }, type: "function" }] };
+                const updatedMessagesAfterRequest = [...currentMessages, toolRequestMessage];
+
+                // 2. Execute the physical tool function
+                let toolResult = "";
+                if (toolCallName === 'fetch_github_activity') {
+                    const args = JSON.parse(toolCallArgs || "{}");
+                    toolResult = await fetchGithubActivity(args.username);
+                } else {
+                    toolResult = JSON.stringify({ error: `Tool ${toolCallName} not found or unsupported.` });
+                }
+
+                // 3. Add Tool Response to history
+                const toolResponseMessage: Message = {
+                    id: toolCallId,
+                    role: "tool",
+                    name: toolCallName,
+                    content: toolResult
+                };
+
+                // Recursively call generateResponseStream to send the tool result back to Groq
+                const messagesWithToolOutput = [...updatedMessagesAfterRequest, toolResponseMessage];
+                await generateResponseStream(input, messagesWithToolOutput);
+
+                return; // Exit this execution since the recursive call handles the rest
+            }
+
+            // Ensure final content is set for normal text
             setMessages(prev => prev.map(msg =>
                 msg.id === msgId
                     ? { ...msg, content: fullContent, isStreaming: false }
@@ -463,6 +558,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             setMessages(prev => [...prev, errorMsg]);
         } finally {
             setIsTyping(false);
+            if (!isToolCall) {
+                setIsFetchingTool(false);
+            }
             abortControllerRef.current = null;
         }
     };
@@ -512,7 +610,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     onScroll={handleScroll}
                     className="flex-1 overflow-y-auto px-2 py-4"
                 >
-                    {messages.map((msg) => (
+                    {messages.filter(m => m.role !== 'tool' && !m.tool_calls && !(m.isStreaming && m.content === '')).map((msg) => (
                         <ChatMessage
                             key={msg.id}
                             role={msg.role}
@@ -521,15 +619,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                         />
                     ))}
 
-                    {isTyping && !messages.some(m => m.isStreaming) && (
-                        <div className="flex w-full mb-6 justify-start animate-pulse">
+                    {/* Consolidated Loading / Tool Execution UI */}
+                    {(isTyping || isFetchingTool) && !messages.some(m => m.isStreaming && m.content !== '') && (
+                        <div className="flex w-full mb-6 justify-start">
                             <div className="flex max-w-[85%] flex-row gap-3">
                                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-white text-black">
                                     <Terminal size={18} />
                                 </div>
-                                <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-gray-900 border border-gray-800 text-gray-400 text-sm flex items-center gap-2">
-                                    <ThinkingVisualizer />
-                                    <span className="text-xs text-gray-500 font-mono self-center ml-2">Process(pid=404)</span>
+                                <div className="flex flex-col gap-2">
+                                    <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-gray-900 border border-gray-800 text-gray-400 text-sm flex items-center gap-2 w-fit">
+                                        <ThinkingVisualizer />
+                                        <span className="text-xs text-gray-500 font-mono self-center ml-2">Process(pid=404)</span>
+                                    </div>
+
+                                    {/* Sub-status for Tool Execution (ChatGPT Style) */}
+                                    {isFetchingTool && (
+                                        <div className="flex items-center gap-2 px-2 text-gray-500 text-xs animate-pulse">
+                                            <Activity size={12} className="text-gray-400" />
+                                            <span>Calling function: <span className="font-mono bg-gray-800/50 px-1 rounded">fetch_github_activity</span>...</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
