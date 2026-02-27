@@ -75,7 +75,7 @@ const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect:
             <button
                 onClick={prevSlide}
                 disabled={currentIndex === 0}
-                className="absolute -left-3 sm:-left-12 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
+                className="absolute left-1 sm:-left-12 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/60 sm:bg-black/50 backdrop-blur-sm rounded-full shadow-lg"
             >
                 <ChevronLeft size={24} className="sm:w-7 sm:h-7" />
             </button>
@@ -83,7 +83,7 @@ const ProjectDeck: React.FC<{ projects: typeof portfolioData.projects; onSelect:
             <button
                 onClick={nextSlide}
                 disabled={currentIndex >= maxIndex}
-                className="absolute -right-3 sm:-right-12 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/50 rounded-full"
+                className="absolute right-1 sm:-right-12 top-1/2 -translate-y-1/2 p-2 sm:p-3 text-white disabled:opacity-20 hover:text-blue-400 transition-colors z-20 bg-black/60 sm:bg-black/50 backdrop-blur-sm rounded-full shadow-lg"
             >
                 <ChevronRight size={24} className="sm:w-7 sm:h-7" />
             </button>
@@ -188,15 +188,15 @@ const RichMessageContent: React.FC<{ content: string; onProjectSelect?: (project
                                 strong: ({ node, ...props }: any) => <span className="font-bold text-white" {...props} />,
                                 ul: ({ node, ...props }: any) => <ul className="list-disc list-outside ml-4 my-2 space-y-1 text-gray-300" {...props} />,
                                 ol: ({ node, ...props }: any) => <ol className="list-decimal list-outside ml-4 my-2 space-y-1 text-gray-300" {...props} />,
-                                li: ({ node, ...props }: any) => <li className="pl-1 leading-relaxed" {...props} />,
-                                p: ({ node, ...props }: any) => <p className="mb-2 last:mb-0 leading-relaxed text-gray-200" {...props} />,
-                                a: ({ node, ...props }: any) => <a className="text-blue-400 hover:text-blue-300 hover:underline transition-colors font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
-                                code: ({ node, ...props }: any) => <span className="font-mono text-sm text-yellow-200/90 bg-white/5 px-1 py-0.5 rounded" {...props} />,
-                                h1: ({ node, ...props }: any) => <h1 className="text-xl font-bold text-white mb-2 mt-4" {...props} />,
-                                h2: ({ node, ...props }: any) => <h2 className="text-lg font-bold text-white mb-2 mt-4" {...props} />,
-                                h3: ({ node, ...props }: any) => <h3 className="text-base font-bold text-white mb-1 mt-3" {...props} />,
+                                li: ({ node, ...props }: any) => <li className="pl-1 leading-relaxed text-xs sm:text-sm md:text-base" {...props} />,
+                                p: ({ node, ...props }: any) => <p className="mb-2 last:mb-0 leading-relaxed text-gray-200 text-xs sm:text-sm md:text-base lg:text-lg" {...props} />,
+                                a: ({ node, ...props }: any) => <a className="text-blue-400 hover:text-blue-300 hover:underline transition-colors font-medium text-xs sm:text-sm md:text-base" target="_blank" rel="noopener noreferrer" {...props} />,
+                                code: ({ node, ...props }: any) => <span className="font-mono text-[10px] sm:text-xs md:text-sm text-yellow-200/90 bg-white/5 px-1 py-0.5 rounded" {...props} />,
+                                h1: ({ node, ...props }: any) => <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2 mt-4" {...props} />,
+                                h2: ({ node, ...props }: any) => <h2 className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 mt-4" {...props} />,
+                                h3: ({ node, ...props }: any) => <h3 className="text-sm sm:text-base md:text-lg font-bold text-white mb-1 mt-3" {...props} />,
                                 // Simplified blockquote
-                                blockquote: ({ node, ...props }: any) => <blockquote className="border-l-4 border-gray-700 pl-4 py-1 my-2 italic text-gray-400" {...props} />,
+                                blockquote: ({ node, ...props }: any) => <blockquote className="border-l-4 border-gray-700 pl-4 py-1 my-2 italic text-gray-400 text-xs sm:text-sm md:text-base" {...props} />,
                             }}
                         >
                             {part}

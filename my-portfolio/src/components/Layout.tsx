@@ -9,7 +9,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, onHomeClick }) => {
     return (
-        <div className="flex flex-col h-screen sm:h-[100dvh] w-full max-w-4xl mx-auto p-4 md:p-6 font-sans">
+        <div className="flex flex-col h-[100dvh] w-full max-w-4xl mx-auto p-4 md:p-6 font-sans">
             <header className="flex justify-between items-center py-4 border-b border-gray-800 mb-4 z-20 relative">
                 <div
                     className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity group"

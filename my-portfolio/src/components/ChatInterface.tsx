@@ -625,19 +625,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 ref={heroRef}
                 className="flex-1 w-full bg-black flex flex-col items-center justify-center p-4 overflow-y-auto"
             >
-                <div className="relative mb-6 md:mb-8 group">
+                <div className="relative mb-4 sm:mb-6 md:mb-8 group">
                     {/* Background Glow - Removed for cleaner look */}
                     <img
                         src={portfolioData.profileImage}
                         alt={portfolioData.name}
-                        className="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-gray-900 shadow-2xl relative z-10"
+                        className="w-28 h-28 sm:w-36 sm:h-36 md:w-48 md:h-48 lg:w-56 lg:h-56 rounded-full object-cover border-4 border-gray-900 shadow-2xl relative z-10"
                     />
-                    <div className="absolute bottom-2 right-2 w-5 h-5 md:w-6 md:h-6 bg-blue-500 border-4 border-black rounded-full z-20"></div>
+                    <div className="absolute bottom-2 right-2 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-blue-500 border-4 border-black rounded-full z-20"></div>
                 </div>
-                <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6 text-center tracking-tight">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 md:mb-6 text-center tracking-tight">
                     Hi, I'm {portfolioData.name}
                 </h2>
-                <p className="text-gray-400 text-center max-w-lg text-base md:text-md leading-relaxed px-4 mb-8">
+                <p className="text-gray-400 text-center max-w-lg md:max-w-xl lg:max-w-2xl text-sm sm:text-base md:text-lg leading-relaxed px-4 mb-6 sm:mb-8">
                     {portfolioData.role}. Ask me anything about my work, skills, or experience.
                 </p>
 
@@ -723,7 +723,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className={`fixed top-1/2 -translate-y-1/2 z-[60] p-3 text-gray-400 hover:text-white bg-[#171717] border border-[#2f2f2f] transition-all duration-300 ease-out shadow-xl ${isSidebarOpen
-                    ? 'left-80 rounded-r-xl border-l-[#171717]'
+                    ? 'left-72 sm:left-80 rounded-r-xl border-l-[#171717]'
                     : 'left-0 rounded-r-xl border-l-0'
                     }`}
                 aria-label="Toggle Menu"

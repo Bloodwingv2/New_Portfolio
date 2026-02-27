@@ -25,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onClear, onCommandSe
 
             {/* Sidebar Panel */}
             <div
-                className={`fixed top-0 left-0 h-full w-80 bg-[#171717] border-r border-[#171717] z-50 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`fixed top-0 left-0 h-full w-72 sm:w-80 bg-[#171717] border-r border-[#171717] z-50 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 <div className="flex flex-col h-full p-6">
                     {/* Header */}

@@ -71,14 +71,14 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, onClick }
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90" />
 
                     {/* Content */}
-                    <div className="absolute bottom-0 left-0 w-full p-5 flex flex-col items-start translate-z-20">
-                        <span className="px-2 py-1 mb-2 text-[10px] font-bold tracking-wider text-blue-400 bg-blue-900/30 border border-blue-500/30 rounded uppercase backdrop-blur-md">
+                    <div className="absolute bottom-0 left-0 w-full p-4 sm:p-5 flex flex-col items-start translate-z-20">
+                        <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 mb-1 sm:mb-2 text-[8px] sm:text-[10px] md:text-xs font-bold tracking-wider text-blue-400 bg-blue-900/30 border border-blue-500/30 rounded uppercase backdrop-blur-md">
                             {project.category}
                         </span>
-                        <h3 className="text-xl font-bold text-white leading-tight mb-1 group-hover:text-blue-300 transition-colors">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white leading-tight mb-1 group-hover:text-blue-300 transition-colors">
                             {project.title}
                         </h3>
-                        <p className="text-xs text-gray-400 line-clamp-2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+                        <p className="text-[10px] sm:text-xs md:text-sm text-gray-400 line-clamp-2 mb-1 sm:mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
                             {project.description}
                         </p>
                     </div>
