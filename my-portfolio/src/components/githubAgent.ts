@@ -43,10 +43,15 @@ export const fetchGithubActivity = async (username: string = 'Bloodwingv2'): Pro
         if (!eventsResponse.ok) throw new Error(`GitHub API (Events) returned status: ${eventsResponse.status}`);
         const events = await eventsResponse.json();
 
-        // 3. Filter and parse relevant activity
-        const relevantEvents = events.filter((event: any) =>
-            event.type === 'PushEvent' || event.type === 'CreateEvent' || event.type === 'PullRequestEvent'
-        );
+        // 3. Filter and parse relevant activity (exclude empty pushes)
+        const relevantEvents = events.filter((event: any) => {
+            if (event.type === 'CreateEvent' || event.type === 'PullRequestEvent') return true;
+            if (event.type === 'PushEvent') {
+                const commits = event.payload?.commits || [];
+                return commits.length > 0; // Only keep pushes that actually have commits
+            }
+            return false;
+        });
 
         let recentActivity = [];
         if (relevantEvents.length > 0) {

@@ -392,7 +392,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             - Use **bold** for key concepts, technologies, and project names.
             - Use \`code\` blocks for commands, shortcuts, or file names.
             - Use bullet points for lists of skills or steps.
-            - Keep responses concise but conversational.`;
+            - Keep responses concise but conversational.
+            AGENTIC TOOL INSTRUCTIONS:
+            - If you call a tool (like \`fetch_github_activity\`) and receive a JSON response, YOU MUST explicitly cite the data inside that JSON but DO NOT just dump a robotic list.
+            - Summarize the activity naturally like a human.
+            - Highlight my repository count or follower stats conversationally (e.g., "I currently have 50 public repositories...").
+            - Describe my recent pushes and PRs with enthusiasm (e.g., "Recently, I've been pushing updates to the main branch of my StockScreener app...").
+            - Use bullet points only for the most significant recent commits if there are several, otherwise write fluid paragraphs.`;
 
             // ==========================================
             // AGENTIC BEHAVIOR: Build Messages for API
