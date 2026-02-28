@@ -28,9 +28,6 @@ interface ChatInterfaceProps {
     onPromptHandled: () => void;
 }
 
-// Global cache to prevent Groq API rate limits when asking for GitHub activity.
-// Hoisted OUTSIDE the component to survive React renders.
-let githubResponseCache = { timestamp: 0, content: "" };
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, activePrompt, onPromptHandled }) => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -237,13 +234,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             normalizedInput.includes("contact") ||
             normalizedInput.includes("social") ||
             normalizedInput.includes("email") ||
-            normalizedInput.includes("reach out")
+            normalizedInput.includes("reach") ||
+            normalizedInput.includes("hire") ||
+            normalizedInput.includes("message")
         ) {
             // Check if it's specifically a request for the form
-            if (normalizedInput.includes("form") || normalizedInput.includes("message") || normalizedInput.includes("send") || normalizedInput.includes("contact")) {
-                // We return a special marker string that we'll catch in generateResponseStream or handle immediately?
-                // Actually, getPredefinedResponse returning a string is strictly for text responses.
-                // If I want to return a component, I need to change the logic control flow.
+            if (normalizedInput.includes("form") || normalizedInput.includes("message") || normalizedInput.includes("send") || normalizedInput.includes("contact") || normalizedInput.includes("hire") || normalizedInput.includes("hiring")) {
                 return "{{CONTACT_FORM}}";
             }
             const socials = portfolioData.socials.map(s => `[${s.name}](${s.url})`).join(' • ');
@@ -354,27 +350,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             }
         }
 
-        // 2. High-Level Caching for GitHub Tool
-        // If the user is specifically asking for GitHub activity, check our global text cache first
-        const lowerInput = input.toLowerCase();
-        if (lowerInput.includes("github") || lowerInput.includes("recent github activity")) {
-            const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-            if (githubResponseCache.content && (Date.now() - githubResponseCache.timestamp < CACHE_TTL)) {
-                console.log("Serving full LLM text from GitHub Cache to save Groq tokens");
-
-                // Fake the tool execution UI and latency for realism
-                setIsTyping(true); // Shows the generic thinking UI
-                setIsFetchingTool(true); // Shows the specific "Calling function: fetch_github_activity" sub-status
-
-                // Simulate network latency for the "API call"
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                setIsFetchingTool(false);
-
-                // Stream the cached response character-by-character as if the LLM is typing it
-                await streamLocalResponse(githubResponseCache.content);
-                return;
-            }
-        }
+        // 2. High-Level Caching for GitHub Tool removed since it's now handled by getPredefinedResponse and Widget UI
 
         // 3. Fallback to LLM API
         const apiKey = import.meta.env.VITE_GROQ_API_KEY;
@@ -428,7 +404,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             - CRITICAL HALLUCINATION PREVENTION: Under NO circumstances should you mention 'ATS', 'Mindwell', 'StockScreener' or any other project from my core background data UNLESS they explicitly appear inside the JSON payload.
             - If the JSON says "No recent public coding activity found", simply apologize and state exactly that. Do not pivot to other subjects.
             - Use bullet points ONLY if you are highlighting 2-3 distinct repositories, otherwise write fluid paragraphs.
-            - CRITICAL: Whenever you use \`fetch_github_activity\`, you must ALWAYS append exactly "\n\n{{GITHUB}}" at the very end of your final response.`;
+            - CRITICAL AND MANDATORY: Whenever you receive a tool response from \`fetch_github_activity\`, you MUST end your VERY NEXT final response with EXACTLY the string "{{GITHUB}}". Do not forget this tag.
+            - Under no circumstances should you output JSON arrays to the user. Read the tool data and summarize it naturally.`;
 
             // ==========================================
             // AGENTIC BEHAVIOR: Build Messages for API
@@ -584,21 +561,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 return; // Exit this execution since the recursive call handles the rest
             }
 
+            // Handle the case where the LLM successfully retrieved the GitHub data via the tool
+            // but completely failed to listen to the prompt to append the {{GITHUB}} tag.
+            // We can detect this if the tool was called in this request chain, but the final text lacks the tag.
+            const containedToolCall = isToolCall || currentMessages.some(m => m.role === 'tool' && m.name === 'fetch_github_activity');
+            let finalOutput = fullContent;
+
+            if (containedToolCall && !fullContent.includes('{{GITHUB}}') && !isToolCall) {
+                console.log("LLM forgot the GITHUB tag after tool call. Manually injecting fail-safe tag.");
+                finalOutput = fullContent + "\n\n{{GITHUB}}";
+            }
+
             // Ensure final content is set for normal text
             setMessages(prev => prev.map(msg =>
                 msg.id === msgId
-                    ? { ...msg, content: fullContent, isStreaming: false }
+                    ? { ...msg, content: finalOutput, isStreaming: false }
                     : msg
             ));
-
-            // If this was a GitHub summary, save the final generated output to the global cache
-            if (fullContent.includes('{{GITHUB}}')) {
-                githubResponseCache = {
-                    timestamp: Date.now(),
-                    content: fullContent
-                };
-                console.log("Saved full LLM response to GitHub Cache.");
-            }
 
         } catch (error: any) {
             if (error.name === 'AbortError') return;
