@@ -158,7 +158,8 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
             description: "An end-end automated Applicant Tracking System that sources candidates across GitHub, LeetCode, and StackOverflow using Legal API's. Uses Machine Learning algorithms for selection and features a live coding portal. Showcases proficiency in ETL data pipelines, ML, Full-stack (FastAPI/Streamlit), and DevOps (GitHub Actions)",
             link: "https://github.com/Bloodwingv2/ATS",
             image: atsimg,
-            techStack: ["FastAPI", "Pandas", "Python", "Streamlit", "Scikit-learn", "Machine Learning", "GitHub CI/CD Actions", "Data Science"]
+            techStack: ["FastAPI", "Pandas", "Python", "Streamlit", "Scikit-learn", "Machine Learning", "GitHub CI/CD Actions", "Data Science"],
+            isNew: true
         },
         {
             id: "mindwell",

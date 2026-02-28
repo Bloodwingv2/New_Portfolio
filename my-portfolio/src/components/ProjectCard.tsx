@@ -10,6 +10,7 @@ interface Project {
     link: string;
     image?: string;
     techStack?: string[];
+    isNew?: boolean;
 }
 
 interface ProjectCardProps {
@@ -83,9 +84,16 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, onClick }
                         </p>
                     </div>
 
-                    {/* Top Right Arrow */}
-                    <div className="absolute top-3 right-3 p-2 bg-black/40 backdrop-blur-sm border border-white/10 rounded-full text-white/70 group-hover:text-white group-hover:bg-blue-600 group-hover:border-blue-500 transition-all duration-300">
-                        <ArrowUpRight size={16} />
+                    {/* Top Right Arrow and New Badge */}
+                    <div className="absolute top-3 right-3 flex items-center gap-2">
+                        {project.isNew && (
+                            <div className="px-2 py-0.5 bg-red-500/10 backdrop-blur-md border border-red-500/20 rounded-full">
+                                <span className="text-[9px] font-semibold text-red-400 uppercase tracking-widest">New</span>
+                            </div>
+                        )}
+                        <div className="p-2 bg-black/40 backdrop-blur-sm border border-white/10 rounded-full text-white/70 group-hover:text-white group-hover:bg-blue-600 group-hover:border-blue-500 transition-all duration-300">
+                            <ArrowUpRight size={16} />
+                        </div>
                     </div>
                 </div>
 

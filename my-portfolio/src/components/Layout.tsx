@@ -1,6 +1,6 @@
 import React from 'react';
 import { portfolioData } from '../data/portfolioData';
-import { Github, Linkedin, Twitter, Mail, ExternalLink } from 'lucide-react';
+import { Github, Linkedin, Twitter, Mail, ExternalLink, Bot } from 'lucide-react';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -17,26 +17,10 @@ const Layout: React.FC<LayoutProps> = ({ children, onHomeClick }) => {
                     title="Back to Home"
                 >
                     <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 border border-gray-800 group-hover:border-white transition-colors">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="w-6 h-6 text-white"
-                        >
-                            <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" />
-                            <path d="m4.93 10.93 1.41 1.41a2 2 0 1 1-2.83 2.83l-1.41-1.41a2 2 0 1 1 2.83-2.83Z" />
-                            <path d="m19.07 10.93-1.41 1.41a2 2 0 1 0 2.83 2.83l1.41-1.41a2 2 0 1 0-2.83-2.83Z" />
-                            <path d="M12 22a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2 2 2 0 0 1 2 2v2a2 2 0 0 1-2 2Z" />
-                            <path d="m4.93 4.93 1.41 1.41a2 2 0 1 0 2.83-2.83L7.76 2.1a2 2 0 1 0-2.83 2.83Z" />
-                            <path d="m19.07 4.93-1.41 1.41a2 2 0 1 1-2.83-2.83l1.41-1.41a2 2 0 1 1 2.83 2.83Z" />
-                        </svg>
+                        <Bot className="w-6 h-6 text-white" />
                     </div>
                     <h1 className="text-xl font-semibold tracking-tight">
-                        <span className="text-gray-500 group-hover:text-gray-300 transition-colors">MGPT</span>
+                        <span className="text-gray-500 group-hover:text-gray-300 transition-colors">AgentFolio</span>
                     </h1>
                 </div>
                 <div className="flex items-center gap-4">
