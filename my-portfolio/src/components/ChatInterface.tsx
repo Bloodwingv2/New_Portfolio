@@ -37,6 +37,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<any>(null);
     const [isFetchingTool, setIsFetchingTool] = useState(false); // New state for tool execution UI
+    const [fakeToolName, setFakeToolName] = useState(""); // Track fake tool names for the UI
 
     // Refs for animations
     const containerRef = useRef<HTMLDivElement>(null);
@@ -333,9 +334,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
         if (!isToolFollowUp) {
             const localResponse = getPredefinedResponse(input);
             if (localResponse) {
+                // Determine a fake tool name for agentic aesthetic
+                let toolStr = "";
+                if (localResponse.includes("{{PROJECTS}}")) toolStr = "query_projects_db";
+                else if (localResponse.includes("{{SKILLS}}")) toolStr = "get_technical_skills";
+                else if (localResponse.includes("{{EXPERIENCE}}")) toolStr = "fetch_work_history";
+                else if (localResponse.includes("{{CERTIFICATIONS}}")) toolStr = "verify_certifications";
+                else if (localResponse.includes("{{BIO}}")) toolStr = "load_user_profile";
+                else if (localResponse.includes("{{HOBBIES}}")) toolStr = "get_interests";
+                else if (localResponse.includes("{{CONTACT_FORM}}") || localResponse.includes("[Email]")) toolStr = "initiate_contact_protocol";
+                else if (localResponse.includes("{{RESUME}}")) toolStr = "generate_resume_link";
+                else toolStr = "search_knowledge_base";
+
                 if (localResponse === "{{CONTACT_FORM}}") {
                     setIsTyping(true);
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    setIsFetchingTool(true);
+                    setFakeToolName(toolStr);
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    setIsFetchingTool(false);
+                    setFakeToolName("");
+
                     const msgId = (Date.now() + 1).toString();
                     setMessages(prev => [...prev, {
                         id: msgId,
@@ -345,6 +363,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     setIsTyping(false);
                     return;
                 }
+
+                // Simulate tool execution delay for realism
+                setIsTyping(true);
+                setIsFetchingTool(true);
+                setFakeToolName(toolStr);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                setIsFetchingTool(false);
+                setFakeToolName("");
+
                 await streamLocalResponse(localResponse);
                 return;
             }
@@ -592,6 +619,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             setIsTyping(false);
             if (!isToolCall) {
                 setIsFetchingTool(false);
+                setFakeToolName("");
             }
             abortControllerRef.current = null;
         }
@@ -668,7 +696,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                                     {isFetchingTool && (
                                         <div className="flex items-center gap-2 px-2 text-gray-500 text-xs animate-pulse">
                                             <Activity size={12} className="text-gray-400" />
-                                            <span>Calling function: <span className="font-mono bg-gray-800/50 px-1 rounded">fetch_github_activity</span>...</span>
+                                            <span>Calling function: <span className="font-mono bg-gray-800/50 px-1 rounded">{fakeToolName || "fetch_github_activity"}</span>...</span>
                                         </div>
                                     )}
                                 </div>
