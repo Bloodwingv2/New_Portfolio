@@ -80,22 +80,26 @@ const InteractiveHobbies: React.FC<InteractiveHobbiesProps> = React.memo(({ hobb
                         return (
                             <div
                                 key={idx}
-                                className={`interactive-hobby-card group relative overflow-hidden rounded-2xl bg-[#111111] border border-gray-800/50 hover:border-gray-600/50 transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-end p-6 ${isLarge ? 'md:col-span-2 md:aspect-[2.5/1]' : 'aspect-square md:aspect-auto md:h-48'}`}
+                                className={`interactive-hobby-card group relative overflow-hidden rounded-2xl bg-[#111111] border border-gray-800/50 hover:border-gray-600/50 transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-end p-6 ${isLarge ? 'md:col-span-2 md:aspect-[2.5/1]' : 'min-h-[240px] md:aspect-auto md:h-48'}`}
                             >
                                 {/* Optional Background Image Layer */}
-                                {hobby.bgImage && (
-                                    <div
-                                        className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-all duration-700 ease-out group-hover:scale-110"
-                                        style={{ backgroundImage: `url(${hobby.bgImage})` }}
-                                    />
-                                )}
+                                {
+                                    hobby.bgImage && (
+                                        <div
+                                            className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-all duration-700 ease-out group-hover:scale-110"
+                                            style={{ backgroundImage: `url(${hobby.bgImage})` }}
+                                        />
+                                    )
+                                }
                                 {/* Background Image Gradient Overlay */}
-                                {hobby.bgImage && (
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/80 to-transparent" />
-                                )}
+                                {
+                                    hobby.bgImage && (
+                                        <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/80 to-transparent" />
+                                    )
+                                }
 
                                 {/* Animated Ambient Glow Background */}
-                                <div
+                                < div
                                     className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-700 ease-out"
                                     style={{
                                         background: `radial-gradient(circle at 50% 120%, ${styleColor}, transparent 70%)`
@@ -136,7 +140,7 @@ const InteractiveHobbies: React.FC<InteractiveHobbiesProps> = React.memo(({ hobb
                 </div>
             </div>
 
-        </div>
+        </div >
     );
 });
 
