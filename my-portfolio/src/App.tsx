@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Layout from './components/Layout';
 import ChatInterface from './components/ChatInterface';
 import SplashScreen from './components/SplashScreen';
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ function App() {
           />
         </Layout>
       )}
+      <Analytics />
     </div>
   );
 }
