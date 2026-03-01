@@ -3,13 +3,14 @@ import Layout from './components/Layout';
 import ChatInterface from './components/ChatInterface';
 import SplashScreen from './components/SplashScreen';
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+    <div className="min-h-[100dvh] bg-black text-white selection:bg-white selection:text-black">
       {loading ? (
         <SplashScreen onComplete={() => setLoading(false)} />
       ) : (
@@ -23,6 +24,7 @@ function App() {
         </Layout>
       )}
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
