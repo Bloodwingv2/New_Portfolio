@@ -11,6 +11,7 @@ import travelimg from '../assets/travel.avif'
 import overwatchimg from '../assets/overwatch.png'
 import githubimg from '../assets/githubbg.png'
 import atsimg from '../assets/atsimg.png'
+import hadoopImg from '../assets/hadoop.png'
 
 // ===================================
 // Type Definitions
@@ -159,6 +160,16 @@ I'm also an avid Agentic Ai Researcher who is actively building industry grade a
             link: "https://github.com/Bloodwingv2/ATS",
             image: atsimg,
             techStack: ["FastAPI", "Pandas", "Python", "Streamlit", "Scikit-learn", "Machine Learning", "GitHub CI/CD Actions", "Data Science"],
+            isNew: true
+        },
+        {
+            id: "Data-Crawler",
+            title: "Gaming Data Crawler",
+            category: "Gaming Data Analysis",
+            description: "A Python-based data crawler for gaming information, focused on scraping data from various gaming websites. ACADEMIC USE ONLY!",
+            link: "https://github.com/Bloodwingv2/Data-Crawler",
+            image: hadoopImg,
+            techStack: ["SQL-lite", "Docker", "Hadoop", "Apache Spark", "TailScale", "Distributed-Systems", "Linux", "Pandas", "Web-Scraping", "Crawlers", "Data Science"],
             isNew: true
         },
         {
