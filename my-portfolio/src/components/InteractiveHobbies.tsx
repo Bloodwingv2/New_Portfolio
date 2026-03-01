@@ -26,9 +26,9 @@ const InteractiveHobbies: React.FC<InteractiveHobbiesProps> = React.memo(({ hobb
         const isMobile = window.innerWidth < 768;
 
         gsap.from(".interactive-hobby-card", {
-            y: 40,
+            y: isMobile ? 20 : 40,
             opacity: 0,
-            rotationX: 10,
+            rotationX: isMobile ? 0 : 10,
             duration: isMobile ? 0.4 : 0.8,
             stagger: isMobile ? 0 : 0.1, // Disable stagger on mobile
             ease: "power3.out",
@@ -40,6 +40,7 @@ const InteractiveHobbies: React.FC<InteractiveHobbiesProps> = React.memo(({ hobb
         }
     }, { scope: containerRef, dependencies: [] });
 
+    // ... GetIcon logic kept the same ...
     const getIcon = (name?: string, props?: LucideProps) => {
         const size = props?.size || 24;
         const className = props?.className || "";
@@ -66,8 +67,10 @@ const InteractiveHobbies: React.FC<InteractiveHobbiesProps> = React.memo(({ hobb
         }
     };
 
+    const isMobileView = typeof window !== 'undefined' && window.innerWidth < 768;
+
     return (
-        <div ref={containerRef} className="flex flex-col gap-8 w-full max-w-2xl mx-auto my-6 overflow-visible" style={{ perspective: '1000px' }}>
+        <div ref={containerRef} className="flex flex-col gap-8 w-full max-w-2xl mx-auto my-6 overflow-visible" style={isMobileView ? {} : { perspective: '1000px' }}>
 
             {/* Hobbies Bento Box */}
             <div className="w-full">
