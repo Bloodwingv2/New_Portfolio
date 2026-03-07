@@ -678,6 +678,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     <img
                         src={portfolioData.profileImage}
                         alt={portfolioData.name}
+                        width="192"
+                        height="192"
                         className="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 rounded-full object-cover border-4 border-gray-900 shadow-2xl relative z-10"
                         fetchPriority="high"
                         decoding="sync"

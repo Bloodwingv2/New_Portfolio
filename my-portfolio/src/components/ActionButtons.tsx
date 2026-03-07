@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, startTransition } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ActionButtonsProps {
@@ -64,9 +64,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect, isDisa
                         key={index}
                         onClick={() => {
                             if (!isDisabled) {
-                                startTransition(() => {
-                                    onSelect(prompt);
-                                });
+                                setTimeout(() => onSelect(prompt), 0);
                             }
                         }}
                         disabled={isDisabled}
