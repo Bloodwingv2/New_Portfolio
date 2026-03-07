@@ -768,6 +768,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 onClose={() => setIsSidebarOpen(false)}
                 onClear={() => setMessages([])}
                 onCommandSelect={handleSendMessage}
+                isDisabled={isTyping || isFetchingTool}
             />
 
             {/* Toggle Sidebar Button - Animate with Sidebar (Desktop Only) */}
@@ -784,7 +785,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
 
             {/* Input Area - Always visible but styled to blend */}
             <div className="pt-2 sm:pt-4 border-t border-gray-800 bg-black z-20 pb-1 sm:pb-2">
-                <ActionButtons prompts={suggestPrompts} onSelect={handleSendMessage} />
+                <ActionButtons
+                    prompts={suggestPrompts}
+                    onSelect={handleSendMessage}
+                    isDisabled={isTyping || isFetchingTool}
+                />
 
                 <form
                     onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputValue); }}
@@ -795,11 +800,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder="Ask something..."
-                        className="flex-1 bg-transparent text-white px-2 py-1 text-sm sm:text-base outline-none placeholder:text-gray-500 font-sans"
+                        disabled={isTyping || isFetchingTool}
+                        className="flex-1 bg-transparent text-white px-2 py-1 text-sm sm:text-base outline-none placeholder:text-gray-500 font-sans disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <button
                         type="submit"
-                        disabled={!inputValue.trim() || isTyping}
+                        disabled={!inputValue.trim() || isTyping || isFetchingTool}
                         className="p-1.5 sm:p-2 bg-white text-black rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         <Send size={16} className="sm:hidden" />

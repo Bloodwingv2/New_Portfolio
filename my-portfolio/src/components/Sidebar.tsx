@@ -6,6 +6,7 @@ interface SidebarProps {
     onClose: () => void;
     onClear: () => void;
     onCommandSelect: (cmd: string) => void;
+    isDisabled?: boolean;
 }
 
 const secretCommands = [
@@ -14,7 +15,7 @@ const secretCommands = [
     { cmd: 'matrix', desc: 'Enter simulation' },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onClear, onCommandSelect }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onClear, onCommandSelect, isDisabled = false }) => {
     return (
         <>
             {/* Backdrop */}
@@ -50,18 +51,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onClear, onCommandSe
                                 <button
                                     key={idx}
                                     onClick={() => {
-                                        onCommandSelect(item.cmd);
-                                        onClose();
+                                        if (!isDisabled) {
+                                            onCommandSelect(item.cmd);
+                                            onClose();
+                                        }
                                     }}
-                                    className="w-full text-left group p-2 rounded-lg hover:bg-[#212121] transition-all"
+                                    disabled={isDisabled}
+                                    className={`w-full text-left group p-2 rounded-lg transition-all ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#212121]'
+                                        }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-6 h-6 flex items-center justify-center rounded bg-[#212121] group-hover:bg-[#2f2f2f] text-gray-200 transition-colors">
+                                        <div className={`w-6 h-6 flex items-center justify-center rounded transition-colors ${isDisabled ? 'bg-[#212121] text-gray-500' : 'bg-[#212121] group-hover:bg-[#2f2f2f] text-gray-200'
+                                            }`}>
                                             <ChevronRight size={14} />
                                         </div>
                                         <div>
-                                            <code className="text-sm font-medium text-gray-200 block">{item.cmd}</code>
-                                            <p className="text-xs text-gray-500">{item.desc}</p>
+                                            <code className={`text-sm font-medium block ${isDisabled ? 'text-gray-500' : 'text-gray-200'}`}>{item.cmd}</code>
+                                            <p className={`text-xs ${isDisabled ? 'text-gray-600' : 'text-gray-500'}`}>{item.desc}</p>
                                         </div>
                                     </div>
                                 </button>
@@ -73,10 +79,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onClear, onCommandSe
                     <div className="pt-6 border-t border-gray-800 mt-auto">
                         <button
                             onClick={() => {
-                                onClear();
-                                onClose();
+                                if (!isDisabled) {
+                                    onClear();
+                                    onClose();
+                                }
                             }}
-                            className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-red-500/20 hover:border-red-500/40"
+                            disabled={isDisabled}
+                            className={`w-full py-3 px-4 flex items-center justify-center gap-2 rounded-lg transition-colors border ${isDisabled
+                                    ? 'bg-red-500/5 text-red-500/50 border-red-500/10 cursor-not-allowed'
+                                    : 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20 hover:border-red-500/40'
+                                }`}
                         >
                             <Trash2 size={18} />
                             <span className="font-medium">Clear Chat History</span>

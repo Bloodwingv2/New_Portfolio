@@ -5,9 +5,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface ActionButtonsProps {
     prompts: string[];
     onSelect: (prompt: string) => void;
+    isDisabled?: boolean;
 }
 
-const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect }) => {
+const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect, isDisabled = false }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(true);
@@ -62,8 +63,11 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ prompts, onSelect }) => {
                 {prompts.map((prompt, index) => (
                     <button
                         key={index}
-                        onClick={() => onSelect(prompt)}
-                        className="whitespace-nowrap px-3 py-1 sm:px-4 sm:py-1.5 bg-gray-900/60 hover:bg-gray-800/80 border border-gray-800/60 hover:border-gray-700/80 rounded-full text-[10px] sm:text-xs text-gray-400 hover:text-white transition-all hover:scale-105 active:scale-95 snap-start shrink-0 backdrop-blur-sm" // Made prompts slightly more transparent to blend
+                        onClick={() => !isDisabled && onSelect(prompt)}
+                        disabled={isDisabled}
+                        className={`whitespace-nowrap px-3 py-1 sm:px-4 sm:py-1.5 bg-gray-900/60 border border-gray-800/60 rounded-full text-[10px] sm:text-xs text-gray-400 snap-start shrink-0 backdrop-blur-sm transition-all
+                            ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800/80 hover:border-gray-700/80 hover:text-white hover:scale-105 active:scale-95'}
+                        `} // Made prompts slightly more transparent to blend and added disabled styling
                     >
                         {prompt}
                     </button>
