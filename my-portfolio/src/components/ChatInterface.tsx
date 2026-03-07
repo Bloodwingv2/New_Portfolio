@@ -248,15 +248,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
             return `You can reach me via:\n\n${socials}`;
         }
 
-        // --- NEW: Block simple inquiries from being caught here so the LLM gets them ---
+        // --- NEW: Directly handle GitHub inquiries to bypass Groq API completely ---
+        // By returning this tag in production, the frontend fetches the 6-hour Vercel Edge Cached LLM Summary.
         if (
             normalizedInput.includes("github") ||
             normalizedInput.includes("working on") ||
             normalizedInput.includes("coding right now") ||
-            normalizedInput.includes("repos")
+            normalizedInput.includes("repos") ||
+            normalizedInput.includes("commit") ||
+            normalizedInput.includes("recent")
         ) {
-            // Let the LLM handle this so it can trigger the tool call
-            return null;
+            if (import.meta.env.DEV) {
+                return null; // Local dev: let the normal Groq flow handle it
+            }
+            return "{{FETCH_CACHED_LLM_GITHUB}}";
         }
 
         // 9. "Do you have a resume?"
@@ -345,6 +350,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                 else if (localResponse.includes("{{HOBBIES}}")) toolStr = "get_interests";
                 else if (localResponse.includes("{{CONTACT_FORM}}")) toolStr = "initiate_contact_protocol";
                 else if (localResponse.includes("{{RESUME}}")) toolStr = "generate_resume_link";
+                else if (localResponse.includes("{{GITHUB}}")) toolStr = "fetch_github_activity";
                 else toolStr = "search_knowledge_base";
 
                 if (localResponse === "{{CONTACT_FORM}}") {
@@ -365,7 +371,41 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ hasStarted, onStart, acti
                     return;
                 }
 
-                // Simulate tool execution delay for realism
+                if (localResponse === "{{FETCH_CACHED_LLM_GITHUB}}") {
+                    // Trigger the UI to look like it's thinking and calling the tool
+                    setIsTyping(true);
+                    setIsFetchingTool(true);
+                    setFakeToolName("fetch_github_activity");
+
+                    try {
+                        const res = await fetch('/api/github-summary');
+                        if (!res.ok) throw new Error("Vercel Edge failed");
+
+                        const cacheStatus = res.headers.get('x-vercel-cache');
+                        if (cacheStatus === 'HIT') {
+                            console.log(`✅ SUCCESS: Response successfully cached! (Vercel Edge: ${cacheStatus})`);
+                            console.log("Using cached GitHub LLM Summary for the next 6 hours (0 tokens used).");
+                        } else if (cacheStatus === 'MISS') {
+                            console.log(`⚠️ CACHE MISS: Vercel hit the real GitHub & Groq API. (Vercel Edge: ${cacheStatus})`);
+                            console.log("LLM Summary fetched and is now cached for 6 hours.");
+                        } else {
+                            console.log(`ℹ️ Vercel Edge Cache Status: ${cacheStatus}`);
+                        }
+
+                        const data = await res.json();
+                        setIsFetchingTool(false);
+                        setFakeToolName("");
+                        await streamLocalResponse(data.summary);
+                    } catch (err) {
+                        console.error("Agent Edge Cache fallback:", err);
+                        setIsFetchingTool(false);
+                        setFakeToolName("");
+                        await streamLocalResponse("Failed to fetch recent activity.\n\n{{GITHUB}}");
+                    }
+                    return;
+                }
+
+                // Simulate tool execution delay for realism for generic predefined responses
                 setIsTyping(true);
                 setIsFetchingTool(true);
                 setFakeToolName(toolStr);
