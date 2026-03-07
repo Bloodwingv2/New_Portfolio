@@ -18,16 +18,34 @@ const GithubWidget: React.FC = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
-                const headers: Record<string, string> = {};
-                if (githubToken) {
-                    headers['Authorization'] = `Bearer ${githubToken}`;
-                }
+                if (import.meta.env.DEV) {
+                    console.log("Widget Local Dev: Fetching stats from GitHub directly.");
+                    const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+                    const headers: Record<string, string> = {};
+                    if (githubToken) {
+                        headers['Authorization'] = `Bearer ${githubToken}`;
+                    }
 
-                const response = await fetch(`https://api.github.com/users/${username}`, { headers });
-                if (response.ok) {
-                    const data = await response.json();
-                    setStats(data);
+                    const response = await fetch(`https://api.github.com/users/${username}`, { headers });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setStats(data);
+                    }
+                } else {
+                    console.log("Widget Production: Fetching stats from Vercel Edge API.");
+                    const response = await fetch(`/api/github-stats?username=${username}`);
+
+                    const cacheStatus = response.headers.get('x-vercel-cache');
+                    if (cacheStatus === 'HIT') {
+                        console.log(`✅ SUCCESS: Widget Stats Cached! (Vercel Edge: ${cacheStatus})`);
+                    } else if (cacheStatus === 'MISS') {
+                        console.log(`⚠️ CACHE MISS: Widget Stats hit GitHub API. (Vercel Edge: ${cacheStatus})`);
+                    }
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setStats(data);
+                    }
                 }
             } catch (error) {
                 console.error("Failed to load GitHub stats for widget:", error);
